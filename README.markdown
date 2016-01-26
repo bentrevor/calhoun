@@ -1,6 +1,6 @@
 ## About
 
-photo website
+Photo website, currently unusable.
 
 > Calhoun was right about the camera: it destroys everything it shoots.
 
