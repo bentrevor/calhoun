@@ -39,7 +39,7 @@ func assertEquals(tb testing.TB, exp, act interface{}) {
 		fmt.Printf("\n\033[31m%s:%d:\n\n\texp: %#v\n\n\tgot: %#v\033[39m\n\n", filepath.Base(file), line, exp, act)
 		tb.FailNow()
 	} else {
-		fmt.Printf("\033[32m.\033[39m\n")
+		fmt.Printf("\033[32m.\033[39m")
 	}
 }
 
@@ -50,11 +50,11 @@ func describe(desc string) {
 		underline += "-"
 	}
 
-	fmt.Print(fmt.Sprintf("\n\n| %s |\n%s\n", desc, underline))
+	fmt.Print(fmt.Sprintf("\n\n\n| %s |\n%s", desc, underline))
 }
 
 func it(desc string) {
-	fmt.Print(fmt.Sprintf("  %s: ", desc))
+	fmt.Print(fmt.Sprintf("\n  %s: ", desc))
 }
 
 func specify(desc string) {

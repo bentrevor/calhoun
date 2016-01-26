@@ -1,7 +1,5 @@
 package calhoun
 
-import "fmt"
-
 type QueryOpts map[string]string
 
 type PhotoDB interface {
@@ -13,12 +11,16 @@ type MemoryDB struct {
 	Photos map[string][]Photo
 }
 
+func NewMemoryDB() MemoryDB {
+	memoryDB := MemoryDB{}
+	memoryDB.Photos = make(map[string][]Photo)
+
+	return memoryDB
+}
+
 func (mk *MemoryDB) Insert(photo Photo, opts QueryOpts) (bool, error) {
 	user := opts["user"]
-	np := append(mk.Photos[user], photo)
-
-	fmt.Printf("asdf\n\n%s\n", np)
-	fmt.Printf("asdf\n\n%d\n", len(np))
+	mk.Photos[user] = append(mk.Photos[user], photo)
 
 	return true, nil
 }
