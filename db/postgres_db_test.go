@@ -13,9 +13,9 @@ func TestPhotoDB_OptsToPostgresInsert(t *testing.T) {
 	It("uses columns/values")
 
 	user := User{Id: 1, Name: "user asdf"}
-	photo := Photo{Filepath: "/path/to/photo"}
+	photo := Photo{Id: 2}
 
-	want := "INSERT INTO photos (filepath, user_id) VALUES ('/path/to/photo', 1)"
+	want := "INSERT INTO photos (id, user_id) VALUES (2, 1)"
 	got := OptsToPostgres(InsertStatement, QueryOpts{User: user, Photo: photo})
 
 	AssertEquals(t, want, got)
@@ -23,11 +23,11 @@ func TestPhotoDB_OptsToPostgresInsert(t *testing.T) {
 
 func TestPhotoDB_OptsToPostgresSelect(t *testing.T) {
 	Describe("building pg SELECT")
-	It("can only `SELECT filepath FROM photos` by user_id") // MVP!
+	It("can only `SELECT id FROM photos` by user_id") // MVP!
 
 	user := User{Id: 1, Name: "user asdf"}
 
-	want := "SELECT filepath FROM photos WHERE user_id = 1;"
+	want := "SELECT id FROM photos WHERE user_id = 1;"
 	got := OptsToPostgres(SelectStatement, QueryOpts{User: user})
 
 	AssertEquals(t, want, got)
@@ -39,7 +39,7 @@ func TestPhotoDB_PostgresDB(t *testing.T) {
 	postgresDB := NewPostgresTestDB()
 
 	It("can insert a photo")
-	photo := Photo{Filepath: "picture"}
+	photo := Photo{Id: 3}
 	user := User{Name: "the user", Id: 1}
 	otherUser := User{Name: "someone else", Id: 2}
 

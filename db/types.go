@@ -16,5 +16,5 @@ type User struct {
 }
 
 type Photo struct {
-	Filepath string
+	Id int
 }

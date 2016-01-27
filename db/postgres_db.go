@@ -26,14 +26,12 @@ func (db *PostgresDB) InsertUser(user User) {
 func OptsToPostgres(statementType StatementType, opts QueryOpts) string {
 	switch statementType {
 	case InsertStatement:
-		columns := "filepath, user_id"
-		values := fmt.Sprintf("'%s', %d", opts.Photo.Filepath, opts.User.Id)
-		stmt := fmt.Sprintf("INSERT INTO photos (%s) VALUES (%s)", columns, values)
-		fmt.Printf("\ninsert statement: %s\n\n", stmt)
-		return stmt
+		columns := "id, user_id"
+		values := fmt.Sprintf("%d, %d", opts.Photo.Id, opts.User.Id)
+		return fmt.Sprintf("INSERT INTO photos (%s) VALUES (%s)", columns, values)
 
 	case SelectStatement:
-		return fmt.Sprintf("SELECT filepath FROM photos WHERE user_id = %d;", opts.User.Id)
+		return fmt.Sprintf("SELECT id FROM photos WHERE user_id = %d;", opts.User.Id)
 	}
 
 	return ""
@@ -61,6 +59,7 @@ func (db *PostgresDB) Select(opts QueryOpts) []Photo {
 	query := OptsToPostgres(SelectStatement, opts)
 	rows, err := db.Query(query)
 	defer rows.Close()
+	log.Print(query)
 
 	if err != nil {
 		log.Fatal("\n\n\ngot an error SELECTing photos:\n  ", query, "\nerr:\n  ", err, "\n\n\n")
@@ -69,10 +68,10 @@ func (db *PostgresDB) Select(opts QueryOpts) []Photo {
 	photos := []Photo{}
 
 	for rows.Next() {
-		var filepath string
-		err = rows.Scan(&filepath)
+		var id int
+		err = rows.Scan(&id)
 
-		photos = append(photos, Photo{Filepath: filepath})
+		photos = append(photos, Photo{Id: id})
 	}
 
 	if err != nil {

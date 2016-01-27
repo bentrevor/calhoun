@@ -4,7 +4,6 @@ CREATE TABLE users (
 );
 
 CREATE TABLE photos (
-id          serial primary key,
-user_id     integer references users(id),
-filepath    varchar(40) NOT NULL CHECK (filepath <> '')
+       id          serial primary key,
+       user_id     integer references users(id)
 );

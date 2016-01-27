@@ -17,7 +17,7 @@ func TestPhotoDB_MemoryDB(t *testing.T) {
 	AssertEquals(t, 0, len(memoryDB.Select(QueryOpts{})))
 
 	It("can insert a photo")
-	photo := Photo{Filepath: "picture"}
+	photo := Photo{Id: 1}
 	user := User{Name: "the user"}
 	otherUser := User{Name: "someone else"}
 
