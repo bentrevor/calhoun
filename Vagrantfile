@@ -24,6 +24,12 @@ SHELL
   install_dev_env = <<-SHELL
 git clone https://github.com/bentrevor/dev-env.git
 /home/vagrant/dev-env/bootstrap --verbose --zsh --vim --dotfiles
+
+echo 'export PGHOST=localhost\nexport PGUSER=calhoun_admin' >> ~/.zshenv
+SHELL
+
+  install_postgres = <<-SHELL
+apt-get install postgresql
 SHELL
 
   provision_environment(config, 'dev', {

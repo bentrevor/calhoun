@@ -1,13 +1,17 @@
 package db
 
-type QueryOpts map[string]string
+type QueryOpts struct {
+	User  User
+	Photo Photo
+}
 
 type PhotoDB interface {
-	Insert(Photo, QueryOpts) (bool, error)
+	Insert(QueryOpts) (bool, error)
 	Select(QueryOpts) []Photo
 }
 
 type User struct {
+	Id   int64
 	Name string
 }
 

@@ -1,34 +1,56 @@
 package db_test
 
 import (
-	// . "github.com/bentrevor/calhoun/db"
+	. "github.com/bentrevor/calhoun/db"
 
 	"testing"
 
 	. "github.com/bentrevor/calhoun/spec-helper"
 )
 
+func TestPhotoDB_OptsToPostgresInsert(t *testing.T) {
+	Describe("building pg INSERT")
+	It("uses columns/values")
+
+	user := User{Id: 1, Name: "user asdf"}
+	photo := Photo{Filepath: "/path/to/photo"}
+
+	want := "INSERT INTO photos (filepath, user_id) VALUES ('/path/to/photo', 1)"
+	got := OptsToPostgres(InsertStatement, QueryOpts{User: user, Photo: photo})
+
+	AssertEquals(t, want, got)
+}
+
+func TestPhotoDB_OptsToPostgresSelect(t *testing.T) {
+	Describe("building pg SELECT")
+	It("can only `SELECT filepath FROM photos` by user_id") // MVP!
+
+	user := User{Id: 1, Name: "user asdf"}
+
+	want := "SELECT filepath FROM photos WHERE user_id = 1;"
+	got := OptsToPostgres(SelectStatement, QueryOpts{User: user})
+
+	AssertEquals(t, want, got)
+}
+
 // TODO shared examples?
 func TestPhotoDB_PostgresDB(t *testing.T) {
-	t.Skip("no!!!!!!!!!!!!!!!!")
-	Describe("postgres db")
+	Describe("PostgresDB")
+	postgresDB := NewPostgresTestDB()
 
-	// postgresDB := NewPostgresDB()
+	It("can insert a photo")
+	photo := Photo{Filepath: "picture"}
+	user := User{Name: "the user", Id: 1}
+	otherUser := User{Name: "someone else", Id: 2}
 
-	It("starts empty")
-	AssertEquals(t, 0, 2)
+	postgresDB.InsertUser(user)
+	postgresDB.InsertUser(otherUser)
 
-	// it("can insert a photo")
-	// photo := Photo{Filepath: "picture"}
-	// user := User{Name: "the user"}
-	// otherUser := User{Name: "someone else"}
+	postgresDB.Insert(QueryOpts{User: user, Photo: photo})
 
-	// postgresDB.Insert(photo, QueryOpts{"user": user.Name})
+	AssertEquals(t, 1, len(postgresDB.Select(QueryOpts{User: user})))
+	AssertEquals(t, 0, len(postgresDB.Select(QueryOpts{User: otherUser})))
 
-	// assertEquals(t, 1, len(postgresDB.Photos))
-	// assertEquals(t, 1, len(postgresDB.Select(QueryOpts{"user": user.Name})))
-	// assertEquals(t, 0, len(postgresDB.Select(QueryOpts{"user": otherUser.Name})))
-
-	// it("can select photos")
-	// assertEquals(t, []Photo{photo}, postgresDB.Select(QueryOpts{"user": user.Name}))
+	It("can select photos")
+	AssertEquals(t, []Photo{photo}, postgresDB.Select(QueryOpts{User: user}))
 }

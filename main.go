@@ -17,6 +17,6 @@ func main() {
 		log.Fatal("ListenAndServe:", err)
 	}
 
-	fmt.Println("server started on 8080")
-	log.Print("server started on 8080")
+	fmt.Println("(fmt.Println) server started on 8080")
+	log.Print("(log.Print) server started on 8080")
 }

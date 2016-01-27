@@ -21,12 +21,12 @@ func TestPhotoDB_MemoryDB(t *testing.T) {
 	user := User{Name: "the user"}
 	otherUser := User{Name: "someone else"}
 
-	memoryDB.Insert(photo, QueryOpts{"user": user.Name})
+	memoryDB.Insert(QueryOpts{User: user, Photo: photo})
 
 	AssertEquals(t, 1, len(memoryDB.Photos))
-	AssertEquals(t, 1, len(memoryDB.Select(QueryOpts{"user": user.Name})))
-	AssertEquals(t, 0, len(memoryDB.Select(QueryOpts{"user": otherUser.Name})))
+	AssertEquals(t, 1, len(memoryDB.Select(QueryOpts{User: user})))
+	AssertEquals(t, 0, len(memoryDB.Select(QueryOpts{User: otherUser})))
 
 	It("can select photos")
-	AssertEquals(t, []Photo{photo}, memoryDB.Select(QueryOpts{"user": user.Name}))
+	AssertEquals(t, []Photo{photo}, memoryDB.Select(QueryOpts{User: user}))
 }

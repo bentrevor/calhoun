@@ -9,5 +9,6 @@ Photo website, currently unusable.
 ### Run tests
 
 For now, there is one package per layer (data/application/UI), and their test suites can be run
-independently using absolute paths: `go test ./app ./db`
+independently using absolute paths: `go test ./app ./db`.  To get test output, you can pass `-v`, or
+run them one package at a time `go test` from the package directory.
 

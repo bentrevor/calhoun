@@ -11,13 +11,13 @@ func NewMemoryDB() MemoryDB {
 	return memoryDB
 }
 
-func (mk *MemoryDB) Insert(photo Photo, opts QueryOpts) (bool, error) {
-	user := opts["user"]
-	mk.Photos[user] = append(mk.Photos[user], photo)
+func (mk *MemoryDB) Insert(opts QueryOpts) (bool, error) {
+	user := opts.User
+	mk.Photos[user.Name] = append(mk.Photos[user.Name], opts.Photo)
 
 	return true, nil
 }
 
 func (mk *MemoryDB) Select(opts QueryOpts) []Photo {
-	return mk.Photos[opts["user"]]
+	return mk.Photos[opts.User.Name]
 }

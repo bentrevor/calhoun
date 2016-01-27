@@ -9,15 +9,15 @@ type PhotoStore struct {
 }
 
 func (store PhotoStore) SavePhoto(user User, photo Photo) (bool, error) {
-	options := map[string]string{"user": user.Name}
+	options := QueryOpts{User: user, Photo: photo}
 
-	store.DB.Insert(photo, options)
+	store.DB.Insert(options)
 
 	return true, nil
 }
 
 func (store PhotoStore) PhotosForUser(user User) []Photo {
-	options := map[string]string{"user": user.Name}
+	options := QueryOpts{User: user}
 
 	return store.DB.Select(options)
 }
