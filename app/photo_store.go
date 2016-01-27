@@ -1,7 +1,7 @@
-package calhoun
+package app
 
 import (
-	. "github.com/bentrevor/calhoun/src/db"
+	. "github.com/bentrevor/calhoun/db"
 )
 
 type PhotoStore struct {

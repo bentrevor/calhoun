@@ -14,23 +14,12 @@ import (
 func Assert(tb testing.TB, condition bool, v ...interface{}) {
 	if !condition {
 		_, file, line, _ := runtime.Caller(1)
-		fmt.Printf("\n\033[31m%s:%d: fialure!!!\033[39m\n\n", append([]interface{}{filepath.Base(file), line}, v...)...)
+		fmt.Printf("\n\033[31m%s:%d: failure!!!\033[39m\n\n", append([]interface{}{filepath.Base(file), line}, v...)...)
 		tb.FailNow()
 	} else {
 		fmt.Printf("\033[32m.\033[39m")
 	}
 }
-
-// // ok fails the test if an err is not nil.
-// func Ok(tb testing.TB, err error) {
-// 	if err != nil {
-// 		_, file, line, _ := runtime.Caller(1)
-// 		fmt.Printf("\n\033[31m%s:%d: unexpected error: %s\033[39m\n\n", filepath.Base(file), line, err.Error())
-// 		tb.FailNow()
-// 	} else {
-// 		fmt.Printf("\033[32m.\033[39m")
-// 	}
-// }
 
 // equals fails the test if exp is not equal to act.
 func AssertEquals(tb testing.TB, exp, act interface{}) {

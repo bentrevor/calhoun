@@ -1,11 +1,11 @@
 package db_test
 
 import (
-	// . "github.com/bentrevor/calhoun/src/db"
+	// . "github.com/bentrevor/calhoun/db"
 
 	"testing"
 
-	. "github.com/bentrevor/calhoun/src/spec-helper"
+	. "github.com/bentrevor/calhoun/spec-helper"
 )
 
 // TODO shared examples?
