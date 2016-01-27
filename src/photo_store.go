@@ -1,15 +1,11 @@
 package calhoun
 
+import (
+	. "github.com/bentrevor/calhoun/src/db"
+)
+
 type PhotoStore struct {
 	DB PhotoDB
-}
-
-type User struct {
-	Name string
-}
-
-type Photo struct {
-	Filepath string
 }
 
 func (store PhotoStore) SavePhoto(user User, photo Photo) (bool, error) {
