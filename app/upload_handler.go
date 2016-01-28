@@ -19,31 +19,36 @@ func UploadFormHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, string(body))
 }
 
-func UploadHandler(w http.ResponseWriter, r *http.Request) {
-	file, header, err := r.FormFile("photoUpload")
+func UploadHandler(srvPath string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// store := PhotoStore{DB: db, srvPath: srvPath}
+		// store.SavePhoto(file)
 
-	if err != nil {
-		fmt.Fprintln(w, err)
-		return
+		file, header, err := r.FormFile("photoUpload")
+
+		if err != nil {
+			fmt.Fprintln(w, err)
+			return
+		}
+
+		defer file.Close()
+
+		uploadedFilename := fmt.Sprintf("%s%s")
+		out, err := os.Create(uploadedFilename)
+		if err != nil {
+			fmt.Fprintf(w, "Unable to create the file for writing. Check your write access privilege")
+			return
+		}
+
+		defer out.Close()
+
+		// write the content from POST to the file
+		_, err = io.Copy(out, file)
+		if err != nil {
+			fmt.Fprintln(w, err)
+		}
+
+		fmt.Fprintf(w, "File uploaded successfully : ")
+		fmt.Fprintf(w, header.Filename)
 	}
-
-	defer file.Close()
-
-	uploadedFilename := fmt.Sprintf("/srv/images/%s", "adf")
-	out, err := os.Create(uploadedFilename)
-	if err != nil {
-		fmt.Fprintf(w, "Unable to create the file for writing. Check your write access privilege")
-		return
-	}
-
-	defer out.Close()
-
-	// write the content from POST to the file
-	_, err = io.Copy(out, file)
-	if err != nil {
-		fmt.Fprintln(w, err)
-	}
-
-	fmt.Fprintf(w, "File uploaded successfully : ")
-	fmt.Fprintf(w, header.Filename)
 }

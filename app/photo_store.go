@@ -8,21 +8,16 @@ import (
 )
 
 type PhotoStore struct {
-	DB PhotoDB
+	DB      PhotoDB
+	SrvPath string
 }
 
 func (store PhotoStore) SavePhoto(user User, photo Photo) (bool, error) {
-	options := QueryOpts{User: user, Photo: photo}
-
-	store.DB.Insert(options)
-
-	return true, nil
+	return store.DB.Insert(QueryOpts{User: user, Photo: photo})
 }
 
 func (store PhotoStore) PhotosForUser(user User) []Photo {
-	options := QueryOpts{User: user}
-
-	return store.DB.Select(options)
+	return store.DB.Select(QueryOpts{User: user})
 }
 
 func (store PhotoStore) PhotoFilepath(photo Photo) string {
@@ -34,5 +29,5 @@ func (store PhotoStore) PhotoFilepath(photo Photo) string {
 		imgMD5[2:],
 	)
 
-	return fmt.Sprintf("/srv/images/%s", hashedImgLocation)
+	return fmt.Sprintf("%s/%s", store.SrvPath, hashedImgLocation)
 }
