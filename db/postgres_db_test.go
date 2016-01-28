@@ -8,8 +8,8 @@ import (
 	. "github.com/bentrevor/calhoun/spec-helper"
 )
 
-func TestPhotoDB_OptsToPostgresInsert(t *testing.T) {
-	Describe("building pg INSERT")
+func TestPostgresDB_OptsToPostgresInsert(t *testing.T) {
+	Describe("PostgresDB: building INSERT query")
 	It("uses columns/values")
 
 	user := User{Id: 1, Name: "user asdf"}
@@ -21,8 +21,8 @@ func TestPhotoDB_OptsToPostgresInsert(t *testing.T) {
 	AssertEquals(t, want, got)
 }
 
-func TestPhotoDB_OptsToPostgresSelect(t *testing.T) {
-	Describe("building pg SELECT")
+func TestPostgresDB_OptsToPostgresSelect(t *testing.T) {
+	Describe("PostgresDB: building SELECT query")
 	It("can only `SELECT id FROM photos` by user_id") // MVP!
 
 	user := User{Id: 1, Name: "user asdf"}
@@ -34,8 +34,8 @@ func TestPhotoDB_OptsToPostgresSelect(t *testing.T) {
 }
 
 // TODO shared examples?
-func TestPhotoDB_PostgresDB(t *testing.T) {
-	Describe("PostgresDB")
+func TestPostgresDB_SavingPhotos(t *testing.T) {
+	Describe("PostgresDB: saving photos")
 	postgresDB := NewPostgresTestDB()
 
 	It("can insert a photo")

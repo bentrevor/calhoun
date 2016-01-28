@@ -19,6 +19,7 @@ type PhotoOrganizer interface {
 // I don't really need ReadPhoto() for now, since I just need PhotoId -> <img> tag.  The requests
 // they make hit the FileServer, which handles reading
 type PhotoPersister interface {
+	RootDir() string
 	WritePhoto(Photo)
 	CountPhotos() int // mostly for debugging/testing
 }

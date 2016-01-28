@@ -8,13 +8,10 @@ import (
 	. "github.com/bentrevor/calhoun/spec-helper"
 )
 
-func TestPhotoDB_MemoryDB(t *testing.T) {
-	Describe("MemoryDB")
+func TestMemoryDB_SavingPhotos(t *testing.T) {
+	Describe("MemoryDB: saving photos")
 
 	memoryDB := NewMemoryDB()
-
-	It("starts as an empty map")
-	AssertEquals(t, 0, len(memoryDB.Select(QueryOpts{})))
 
 	It("can insert a photo")
 	photo := Photo{Id: 1}

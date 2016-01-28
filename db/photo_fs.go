@@ -1,13 +1,23 @@
 package db
 
 import (
+	"crypto/md5"
+	"fmt"
 	"io"
 	"log"
 	"os"
 )
 
 type PhotoFS struct {
-	Photos []Photo
+	rootDir string
+}
+
+func NewPhotoFS(srvPath string) *PhotoFS {
+	return &PhotoFS{rootDir: srvPath}
+}
+
+func (fs *PhotoFS) RootDir() string {
+	return fs.rootDir
 }
 
 func (fs *PhotoFS) WritePhoto(photo Photo) {
@@ -27,5 +37,17 @@ func (fs *PhotoFS) WritePhoto(photo Photo) {
 }
 
 func (fs *PhotoFS) CountPhotos() int {
-	return len(fs.Photos)
+	return 50 // TODO count files in srv directory
+}
+
+func (fs *PhotoFS) PhotoFilepath(photo Photo) string {
+	paddedId := fmt.Sprintf("%012d", photo.Id)
+	imgMD5 := md5.Sum([]byte(paddedId))
+	hashedImgLocation := fmt.Sprintf("%x/%x/%x",
+		imgMD5[0],
+		imgMD5[1],
+		imgMD5[2:],
+	)
+
+	return fmt.Sprintf("%s/%s", fs.rootDir, hashedImgLocation)
 }

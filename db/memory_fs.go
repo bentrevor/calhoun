@@ -5,11 +5,15 @@ type MemoryFS struct {
 	Asdf   []int
 }
 
-func NewMemoryFS() MemoryFS {
+func NewMemoryFS() *MemoryFS {
 	memoryFS := MemoryFS{}
 	memoryFS.Photos = make(map[string]Photo)
 
-	return memoryFS
+	return &memoryFS
+}
+
+func (*MemoryFS) RootDir() string {
+	return "/fake/srv/path"
 }
 
 func (fs *MemoryFS) WritePhoto(photo Photo) {

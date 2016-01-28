@@ -4,11 +4,11 @@ type MemoryDB struct {
 	Photos map[string][]Photo
 }
 
-func NewMemoryDB() MemoryDB {
+func NewMemoryDB() *MemoryDB {
 	memoryDB := MemoryDB{}
 	memoryDB.Photos = make(map[string][]Photo)
 
-	return memoryDB
+	return &memoryDB
 }
 
 func (mk *MemoryDB) Insert(opts QueryOpts) int {

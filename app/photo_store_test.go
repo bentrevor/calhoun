@@ -9,30 +9,24 @@ import (
 	. "github.com/bentrevor/calhoun/spec-helper"
 )
 
-func TestPhotoStore_Filepath(t *testing.T) {
-	// photos will be stored in /srv/images, in directories based on the md5 hash of their id
-	// padded in front with 0's to 12 decimal places
+func TestPhotoStore_Creation(t *testing.T) {
+	Describe("PhotoStore: creation")
 
-	// $ echo -n "000000000012" | md5sum
-	// 9ed63b492437de85736cb562f91f203c  -
-	want := "/fake/srv/path/9e/d6/3b492437de85736cb562f91f203c"
+	It("uses a fake srv path for the test env")
+	store := NewPhotoStore("test", "")
+	AssertEquals(t, "/fake/srv/path", store.SrvPath)
 
-	Describe("image filepaths")
-	photo := Photo{Id: 12}
-	memoryDB := NewMemoryDB()
-	store := PhotoStore{DB: &memoryDB, SrvPath: "/fake/srv/path"}
-
-	It("takes the md5 hash of (photo_id padded in front with 0s to 12 places)")
-	AssertEquals(t, want, store.PhotoFilepath(photo))
+	It("uses a PhotoFS rooted at the injected srvPath for the dev env")
+	storeB := NewPhotoStore("dev", "/injected/filepath")
+	AssertEquals(t, "/injected/filepath", storeB.SrvPath)
+	AssertEquals(t, "/injected/filepath", storeB.FS.RootDir())
 }
 
 func TestPhotoStore_SavingPhotos(t *testing.T) {
-	Describe("PhotoStore")
-	memoryDB := NewMemoryDB()
-	memoryFS := NewMemoryFS()
+	Describe("PhotoStore: saving photos")
 	user := User{Name: "ben"}
 	photo := Photo{Id: 1}
-	store := PhotoStore{DB: &memoryDB, FS: &memoryFS, SrvPath: "/fake/srv/path"}
+	store := NewPhotoStore("test", "/fake/srv/path")
 
 	store.SavePhoto(user, photo.PhotoFile)
 
