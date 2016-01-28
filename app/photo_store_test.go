@@ -9,20 +9,7 @@ import (
 	. "github.com/bentrevor/calhoun/spec-helper"
 )
 
-func TestPhotoStore_CanSavePhoto(t *testing.T) {
-	Describe("PhotoStore")
-	memoryDB := NewMemoryDB()
-	user := User{Name: "ben"}
-	photo := Photo{Id: 1}
-	store := PhotoStore{DB: &memoryDB, SrvPath: "/fake/srv/path"}
-
-	store.SavePhoto(user, photo)
-
-	It("stores it in the db")
-	AssertEquals(t, 1, len(store.PhotosForUser(user)))
-}
-
-func TestPhotoStore_CanGetFilepath(t *testing.T) {
+func TestPhotoStore_Filepath(t *testing.T) {
 	// photos will be stored in /srv/images, in directories based on the md5 hash of their id
 	// padded in front with 0's to 12 decimal places
 
@@ -37,4 +24,21 @@ func TestPhotoStore_CanGetFilepath(t *testing.T) {
 
 	It("takes the md5 hash of (photo_id padded in front with 0s to 12 places)")
 	AssertEquals(t, want, store.PhotoFilepath(photo))
+}
+
+func TestPhotoStore_SavingPhotos(t *testing.T) {
+	Describe("PhotoStore")
+	memoryDB := NewMemoryDB()
+	memoryFS := NewMemoryFS()
+	user := User{Name: "ben"}
+	photo := Photo{Id: 1}
+	store := PhotoStore{DB: &memoryDB, FS: &memoryFS, SrvPath: "/fake/srv/path"}
+
+	store.SavePhoto(user, photo.PhotoFile)
+
+	It("stores it in the db")
+	AssertEquals(t, 1, len(store.PhotosForUser(user)))
+
+	It("saves the file to the filesystem")
+	AssertEquals(t, 1, store.FS.CountPhotos())
 }

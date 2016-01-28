@@ -15,7 +15,7 @@ func TestPhotoDB_OptsToPostgresInsert(t *testing.T) {
 	user := User{Id: 1, Name: "user asdf"}
 	photo := Photo{Id: 2}
 
-	want := "INSERT INTO photos (id, user_id) VALUES (2, 1)"
+	want := "INSERT INTO photos (user_id) VALUES (1)"
 	got := OptsToPostgres(InsertStatement, QueryOpts{User: user, Photo: photo})
 
 	AssertEquals(t, want, got)
@@ -39,18 +39,18 @@ func TestPhotoDB_PostgresDB(t *testing.T) {
 	postgresDB := NewPostgresTestDB()
 
 	It("can insert a photo")
-	photo := Photo{Id: 3}
 	user := User{Name: "the user", Id: 1}
 	otherUser := User{Name: "someone else", Id: 2}
 
 	postgresDB.InsertUser(user)
 	postgresDB.InsertUser(otherUser)
 
-	postgresDB.Insert(QueryOpts{User: user, Photo: photo})
+	photoId := postgresDB.Insert(QueryOpts{User: user})
 
 	AssertEquals(t, 1, len(postgresDB.Select(QueryOpts{User: user})))
 	AssertEquals(t, 0, len(postgresDB.Select(QueryOpts{User: otherUser})))
 
 	It("can select photos")
+	photo := Photo{Id: photoId}
 	AssertEquals(t, []Photo{photo}, postgresDB.Select(QueryOpts{User: user}))
 }

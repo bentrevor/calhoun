@@ -20,14 +20,14 @@ const (
 )
 
 func (db *PostgresDB) InsertUser(user User) {
-	db.Exec(fmt.Sprintf("insert into users (id, name) values (%d, '%s')", user.Id, user.Name))
+	db.Exec(fmt.Sprintf("insert into users (name) values ('%s')", user.Name))
 }
 
 func OptsToPostgres(statementType StatementType, opts QueryOpts) string {
 	switch statementType {
 	case InsertStatement:
-		columns := "id, user_id"
-		values := fmt.Sprintf("%d, %d", opts.Photo.Id, opts.User.Id)
+		columns := "user_id"
+		values := fmt.Sprintf("%d", opts.User.Id)
 		return fmt.Sprintf("INSERT INTO photos (%s) VALUES (%s)", columns, values)
 
 	case SelectStatement:
@@ -38,21 +38,29 @@ func OptsToPostgres(statementType StatementType, opts QueryOpts) string {
 }
 
 func NewPostgresTestDB() *PostgresDB {
+	db := NewPostgresDB("test")
+	db.Exec("DELETE FROM photos *;") // "database cleaner"
+	return db
+}
+
+func NewPostgresDB(environment string) *PostgresDB {
 	// TODO don't disable ssl...
-	db, err := sql.Open("postgres", "user=calhoun_admin dbname=calhoun_test sslmode=disable")
+	db, err := sql.Open("postgres", fmt.Sprintf("user=calhoun_admin dbname=calhoun_%s sslmode=disable", environment))
 
 	if err != nil {
 		log.Fatal("failure connecting to database: ", err)
 	}
 
-	db.Exec("DELETE FROM photos *;")
 	return &PostgresDB{DB: db}
 }
 
-func (db *PostgresDB) Insert(opts QueryOpts) (bool, error) {
-	db.Exec(OptsToPostgres(InsertStatement, opts))
+func (db *PostgresDB) Insert(opts QueryOpts) int {
+	_, err := db.Exec(OptsToPostgres(InsertStatement, opts))
+	if err != nil {
+		log.Fatal("failure inserting into database: ", err)
+	}
 
-	return true, nil
+	return 1 // TODO id
 }
 
 func (db *PostgresDB) Select(opts QueryOpts) []Photo {

@@ -3,17 +3,31 @@ package app
 import (
 	"crypto/md5"
 	"fmt"
+	"mime/multipart"
 
 	. "github.com/bentrevor/calhoun/db"
 )
 
 type PhotoStore struct {
-	DB      PhotoDB
+	FS      PhotoPersister
+	DB      PhotoOrganizer
 	SrvPath string
 }
 
-func (store PhotoStore) SavePhoto(user User, photo Photo) (bool, error) {
-	return store.DB.Insert(QueryOpts{User: user, Photo: photo})
+func (store PhotoStore) SavePhoto(user User, photoFile *multipart.File) (bool, error) {
+	photoId := store.savePhotoToDB(user)
+	store.savePhotoToFS(photoFile, photoId)
+
+	return true, nil
+}
+
+func (store PhotoStore) savePhotoToDB(user User) int {
+	return store.DB.Insert(QueryOpts{User: user})
+}
+
+func (store PhotoStore) savePhotoToFS(photoFile *multipart.File, photoId int) {
+	photo := Photo{Id: photoId, PhotoFile: photoFile}
+	store.FS.WritePhoto(photo)
 }
 
 func (store PhotoStore) PhotosForUser(user User) []Photo {

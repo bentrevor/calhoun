@@ -2,10 +2,10 @@ package app
 
 import (
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
-	"os"
+
+	. "github.com/bentrevor/calhoun/db"
 )
 
 func UploadFormHandler(w http.ResponseWriter, r *http.Request) {
@@ -21,10 +21,10 @@ func UploadFormHandler(w http.ResponseWriter, r *http.Request) {
 
 func UploadHandler(srvPath string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// store := PhotoStore{DB: db, srvPath: srvPath}
-		// store.SavePhoto(file)
-
-		file, header, err := r.FormFile("photoUpload")
+		// TODO figure out global variable for environment
+		db := NewPostgresDB("dev")
+		store := PhotoStore{DB: db, SrvPath: srvPath}
+		file, _, err := r.FormFile("photoUpload")
 
 		if err != nil {
 			fmt.Fprintln(w, err)
@@ -33,22 +33,6 @@ func UploadHandler(srvPath string) http.HandlerFunc {
 
 		defer file.Close()
 
-		uploadedFilename := fmt.Sprintf("%s%s")
-		out, err := os.Create(uploadedFilename)
-		if err != nil {
-			fmt.Fprintf(w, "Unable to create the file for writing. Check your write access privilege")
-			return
-		}
-
-		defer out.Close()
-
-		// write the content from POST to the file
-		_, err = io.Copy(out, file)
-		if err != nil {
-			fmt.Fprintln(w, err)
-		}
-
-		fmt.Fprintf(w, "File uploaded successfully : ")
-		fmt.Fprintf(w, header.Filename)
+		store.SavePhoto(User{Name: "ben"}, &file)
 	}
 }
