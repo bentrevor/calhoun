@@ -28,7 +28,7 @@ func main() {
 
 	flag.StringVar(&rootDir, "root-dir", "/home/vagrant/go/src/github.com/bentrevor/calhoun", "project root")
 	flag.StringVar(&assetPath, "asset-path", fmt.Sprintf("%s/assets", rootDir), "asset path")
-	flag.StringVar(&srvPath, "srv-path", fmt.Sprintf("%s/images/srv", rootDir), "path to save uploaded files")
+	flag.StringVar(&srvPath, "srv-path", fmt.Sprintf("%s/images/srv", assetPath), "path to save uploaded files")
 
 	flag.Parse()
 

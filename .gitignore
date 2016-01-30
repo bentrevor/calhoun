@@ -1,5 +1,5 @@
 .vagrant
 calhoun
-srv
+assets/images/srv
 prod_env.conf
 testdata

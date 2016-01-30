@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+
+dbName="calhoun_$1"
+
+dropdb $dbName &&
+    createdb $dbName &&
+    echo "\i $PWD/db/structure.sql" | psql -d $dbName
+
+# eventually should have a ./bin/seed-db
+echo "INSERT INTO users (name) VALUES ('God');" | psql -d $dbName

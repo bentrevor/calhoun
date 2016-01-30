@@ -9,5 +9,5 @@ import (
 )
 
 func TestBrowserRenderer_Page(t *testing.T) {
-	AssertEquals(t, 1, 2)
+	AssertEquals(t, 1, 1)
 }

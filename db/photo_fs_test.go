@@ -15,8 +15,8 @@ import (
 
 func TestPhotoFS_Filepath(t *testing.T) {
 	Describe("PhotoFS: filepath")
-	// photos will be stored in /srv/images, in directories based on the md5 hash of their id
-	// padded in front with 0's to 12 decimal places
+	// photos will be stored in <asset path>/images/srv, in directories based on the md5 hash of
+	// their id padded in front with 0's to 12 decimal places
 
 	// $ echo -n "000000000012" | md5sum
 	// 9ed63b492437de85736cb562f91f203c  -

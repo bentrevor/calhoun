@@ -28,7 +28,7 @@ func OptsToPostgres(statementType StatementType, opts QueryOpts) string {
 	case InsertStatement:
 		columns := "user_id"
 		values := fmt.Sprintf("%d", opts.User.Id)
-		return fmt.Sprintf("INSERT INTO photos (%s) VALUES (%s)", columns, values)
+		return fmt.Sprintf("INSERT INTO photos (%s) VALUES (%s) RETURNING id;", columns, values)
 
 	case SelectStatement:
 		return fmt.Sprintf("SELECT id FROM photos WHERE user_id = %d;", opts.User.Id)
@@ -58,12 +58,15 @@ func NewPostgresDB(environment string) *PostgresDB {
 }
 
 func (db *PostgresDB) Insert(opts QueryOpts) int {
-	_, err := db.Exec(OptsToPostgres(InsertStatement, opts))
+	var photoId int
+	query := OptsToPostgres(InsertStatement, opts)
+
+	err := db.QueryRow(query).Scan(&photoId)
 	if err != nil {
 		log.Fatal("failure inserting into database: ", err)
 	}
 
-	return 1 // TODO id
+	return photoId
 }
 
 func (db *PostgresDB) Select(opts QueryOpts) []Photo {

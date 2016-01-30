@@ -29,8 +29,9 @@ func UploadHandler(srvPath string) http.HandlerFunc {
 			return
 		}
 
-		db := NewPostgresDB("dev")
-		store := PhotoStore{DB: db, SrvPath: srvPath}
-		store.SavePhoto(User{Name: "ben"}, &file)
+		user := User{Id: 1, Name: "God"} // until auth middleware is implemented
+
+		store := NewPhotoStore("dev", srvPath)
+		store.SavePhoto(user, &file)
 	}
 }
