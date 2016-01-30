@@ -40,6 +40,9 @@ func OptsToPostgres(statementType StatementType, opts QueryOpts) string {
 func NewPostgresTestDB() *PostgresDB {
 	db := NewPostgresDB("test")
 	db.Exec("DELETE FROM photos *;") // "database cleaner"
+	db.Exec("DELETE FROM users *;")
+	db.Exec("ALTER SEQUENCE photos_id_seq RESTART WITH 1;")
+	db.Exec("ALTER SEQUENCE users_id_seq RESTART WITH 1;")
 	return db
 }
 
