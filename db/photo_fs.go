@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 )
 
 type PhotoFS struct {
@@ -21,14 +22,22 @@ func (fs *PhotoFS) RootDir() string {
 }
 
 func (fs *PhotoFS) WritePhoto(photo Photo) {
-	photoFilename := "TODO" // hash from photoId
-	out, err := os.Create(photoFilename)
+	photoFilepath := fs.PhotoFilepath(photo)
+	dirs := strings.Split(photoFilepath, "/")
+	photoDir := strings.Join(dirs[:len(dirs)-1], "/")
+
+	err := os.MkdirAll(photoDir, 0755)
+
+	if err != nil {
+		log.Fatal("Unable to create the photo dir:  ", err)
+	}
+
+	out, err := os.Create(photoFilepath)
+	defer out.Close()
 
 	if err != nil {
 		log.Fatal("Unable to create the file for writing:  ", err)
 	}
-
-	defer out.Close()
 
 	_, err = io.Copy(out, *photo.PhotoFile)
 	if err != nil {
