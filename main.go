@@ -6,7 +6,10 @@ import (
 	"log"
 	"net/http"
 
-	. "github.com/bentrevor/calhoun/app"
+	"github.com/bentrevor/calhoun/app"
+	"github.com/bentrevor/calhoun/db"
+	"github.com/bentrevor/calhoun/web"
+
 	"github.com/namsral/flag"
 )
 
@@ -24,22 +27,34 @@ func main() {
 		rootDir   string
 		assetPath string
 		srvPath   string
+		ui        string
 	)
 
 	flag.StringVar(&rootDir, "root-dir", "/home/vagrant/go/src/github.com/bentrevor/calhoun", "project root")
-	flag.StringVar(&assetPath, "asset-path", fmt.Sprintf("%s/assets", rootDir), "asset path")
+	flag.StringVar(&assetPath, "asset-path", fmt.Sprintf("web/assets", rootDir), "asset path")
 	flag.StringVar(&srvPath, "srv-path", fmt.Sprintf("%s/images/srv", assetPath), "path to save uploaded files")
+
+	// for now, just http/json server, but eventually cli inputs, mobile apps, etc.
+	flag.StringVar(&ui, "ui", "web", "")
 
 	flag.Parse()
 
-	http.HandleFunc("/", RootHandler)
-	http.HandleFunc("/upload_photo", UploadFormHandler(rootDir))
-	http.HandleFunc("/upload", UploadHandler(srvPath))
+	switch ui {
+	case "web":
+		postgresDB := db.NewPostgresDB("dev")
+		realFS := db.NewRealFS(srvPath)
+		store := app.CalhounStore{DB: postgresDB, FS: realFS, SrvPath: srvPath}
+		renderer := web.BrowserRenderer{}
 
-	// TODO should use a real asset pipeline eventually
-	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("/home/vagrant/go/src/github.com/bentrevor/calhoun/assets"))))
+		server := app.CalhounServer{
+			Store:         store,
+			Renderer:      renderer,
+			AssetPath:     assetPath,
+			FullAssetPath: fmt.Sprintf("%s/%s", rootDir, assetPath),
+		}
 
-	log.Print("server starting on 8080...\n")
-
-	log.Fatal(http.ListenAndServe(":8080", nil))
+		server.Run()
+	default:
+		log.Fatal("can only use web ui for now: `", ui, "` not supported")
+	}
 }

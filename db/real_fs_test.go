@@ -6,6 +6,7 @@ import (
 	"mime/multipart"
 	"os"
 
+	. "github.com/bentrevor/calhoun/app"
 	. "github.com/bentrevor/calhoun/db"
 
 	"testing"
@@ -13,8 +14,8 @@ import (
 	. "github.com/bentrevor/calhoun/spec-helper"
 )
 
-func TestPhotoFS_Filepath(t *testing.T) {
-	Describe("PhotoFS: filepath")
+func TestRealFS_Filepath(t *testing.T) {
+	Describe("RealFS: filepath")
 	// photos will be stored in <asset path>/images/srv, in directories based on the md5 hash of
 	// their id padded in front with 0's to 12 decimal places
 
@@ -23,16 +24,16 @@ func TestPhotoFS_Filepath(t *testing.T) {
 	want := "/fake/srv/path/9e/d6/3b492437de85736cb562f91f203c"
 
 	photo := Photo{Id: 12}
-	fs := NewPhotoFS("/fake/srv/path")
+	fs := NewRealFS("/fake/srv/path")
 
 	It("takes the md5 hash of (photo_id padded in front with 0s to 12 places)")
 	AssertEquals(t, want, fs.PhotoFilepath(photo))
 }
 
-func TestPhotoFS_Writing(t *testing.T) {
-	Describe("PhotoFS: writing file")
+func TestRealFS_Writing(t *testing.T) {
+	Describe("RealFS: writing file")
 	rootDir := "/home/vagrant/go/src/github.com/bentrevor/calhoun"
-	photoPath := fmt.Sprintf("%s/assets/images/dog.png", rootDir)
+	photoPath := fmt.Sprintf("%s/web/assets/images/dog.png", rootDir)
 
 	photoFile, err := os.Open(photoPath)
 	defer photoFile.Close()
@@ -46,7 +47,7 @@ func TestPhotoFS_Writing(t *testing.T) {
 	photo := Photo{Id: 12, PhotoFile: &mpPhoto}
 
 	fsRoot := fmt.Sprintf("%s/testdata", rootDir)
-	fs := NewPhotoFS(fsRoot)
+	fs := NewRealFS(fsRoot)
 	fs.WritePhoto(photo)
 
 	It("saves to the filesystem")

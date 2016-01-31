@@ -1,6 +1,7 @@
 package db_test
 
 import (
+	. "github.com/bentrevor/calhoun/app"
 	. "github.com/bentrevor/calhoun/db"
 
 	"testing"

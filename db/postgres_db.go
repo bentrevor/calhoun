@@ -6,6 +6,8 @@ import (
 	"log"
 
 	_ "github.com/lib/pq"
+
+	. "github.com/bentrevor/calhoun/app"
 )
 
 type PostgresDB struct {

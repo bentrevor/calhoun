@@ -1,4 +1,4 @@
-package ui
+package web
 
 import (
 	"fmt"
@@ -14,6 +14,13 @@ type Page struct {
 type BrowserRenderer struct {
 	RespWriter http.ResponseWriter
 	ViewsPath  string
+}
+
+func (br BrowserRenderer) Handle(route string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// TODO switch route
+		fmt.Fprintf(w, "the route you got was: %s", route)
+	}
 }
 
 func (br *BrowserRenderer) RenderHtmlFile(filename string) {

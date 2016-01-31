@@ -7,21 +7,23 @@ import (
 	"log"
 	"os"
 	"strings"
+
+	. "github.com/bentrevor/calhoun/app"
 )
 
-type PhotoFS struct {
+type RealFS struct {
 	rootDir string
 }
 
-func NewPhotoFS(srvPath string) *PhotoFS {
-	return &PhotoFS{rootDir: srvPath}
+func NewRealFS(srvPath string) *RealFS {
+	return &RealFS{rootDir: srvPath}
 }
 
-func (fs *PhotoFS) RootDir() string {
+func (fs *RealFS) RootDir() string {
 	return fs.rootDir
 }
 
-func (fs *PhotoFS) WritePhoto(photo Photo) {
+func (fs *RealFS) WritePhoto(photo Photo) {
 	photoFilepath := fs.PhotoFilepath(photo)
 	dirs := strings.Split(photoFilepath, "/")
 	photoDir := strings.Join(dirs[:len(dirs)-1], "/")
@@ -45,11 +47,11 @@ func (fs *PhotoFS) WritePhoto(photo Photo) {
 	}
 }
 
-func (fs *PhotoFS) CountPhotos() int {
+func (fs *RealFS) CountPhotos() int {
 	return 50 // TODO count files in srv directory
 }
 
-func (fs *PhotoFS) PhotoFilepath(photo Photo) string {
+func (fs *RealFS) PhotoFilepath(photo Photo) string {
 	paddedId := fmt.Sprintf("%012d", photo.Id)
 	imgMD5 := md5.Sum([]byte(paddedId))
 	hashedImgLocation := fmt.Sprintf("%x/%x/%x",

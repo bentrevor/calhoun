@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	. "github.com/bentrevor/calhoun/db"
-	. "github.com/bentrevor/calhoun/ui"
+	. "github.com/bentrevor/calhoun/web"
 )
 
 func UploadFormHandler(rootDir string) http.HandlerFunc {
@@ -31,7 +30,7 @@ func UploadHandler(srvPath string) http.HandlerFunc {
 
 		user := User{Id: 1, Name: "God"} // until auth middleware is implemented
 
-		store := NewPhotoStore("dev", srvPath)
+		store := CalhounStore{SrvPath: srvPath}
 		store.SavePhoto(user, &file)
 	}
 }

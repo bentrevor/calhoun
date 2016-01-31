@@ -1,16 +1,14 @@
-package db
+package app
 
-import "mime/multipart"
-
-type QueryOpts struct {
-	User  User
-	Photo Photo
-}
+import (
+	"mime/multipart"
+	"net/http"
+)
 
 // e.g. postgres vs. in-memory
-// the PhotoStore will use this to get a list of photo ids to use (queries will eventually get more
+// the CalhounStore will use this to get a list of photo ids to use (queries will eventually get more
 // complicated than `WHERE user_id = %d`)
-type PhotoOrganizer interface {
+type CalhounDB interface {
 	Insert(QueryOpts) int
 	Select(QueryOpts) []Photo
 }
@@ -18,10 +16,19 @@ type PhotoOrganizer interface {
 // e.g. filesystem vs. S3
 // I don't really need ReadPhoto() for now, since I just need PhotoId -> <img> tag.  The requests
 // they make hit the FileServer, which handles reading
-type PhotoPersister interface {
+type CalhounFS interface {
 	RootDir() string
 	WritePhoto(Photo)
 	CountPhotos() int // mostly for debugging/testing
+}
+
+type CalhounRenderer interface {
+	Handle(string) http.HandlerFunc
+}
+
+type QueryOpts struct {
+	User  User
+	Photo Photo
 }
 
 type User struct {
