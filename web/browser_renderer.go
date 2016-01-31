@@ -19,8 +19,7 @@ type Route struct {
 }
 
 type BrowserRenderer struct {
-	RespWriter http.ResponseWriter
-	ViewsPath  string
+	ViewsPath string
 }
 
 func (br BrowserRenderer) RegisterRoutes(assetPath, fullAssetPath string, store app.CalhounStore) {
@@ -30,7 +29,6 @@ func (br BrowserRenderer) RegisterRoutes(assetPath, fullAssetPath string, store 
 
 func (br BrowserRenderer) registerUserRoutes(store app.CalhounStore) {
 	routes := []Route{
-		// TODO should probably figure out a way to enforce a Method on these...
 		Route{
 			Path: "/upload",
 			HandlerFunc: func(w http.ResponseWriter, r *http.Request) {
@@ -38,17 +36,24 @@ func (br BrowserRenderer) registerUserRoutes(store app.CalhounStore) {
 				defer file.Close()
 
 				if err != nil {
-					fmt.Fprintln(w, err)
+					fmt.Fprintln(w, "error reading photo upload: ", err)
 					return
 				}
 
 				user := app.User{Id: 1, Name: "God"} // until auth middleware is implemented
-				store.SavePhoto(user, &file)
+				err = store.SavePhoto(user, &file)
+
+				if err == nil {
+					br.RenderHtmlFile("upload_success", w)
+				} else {
+					fmt.Fprintln(w, "error saving photo: ", err)
+					return
+				}
 			}},
 		Route{
 			Path: "/upload_photo",
 			HandlerFunc: func(w http.ResponseWriter, r *http.Request) {
-				br.RenderHtmlFile("upload_photo_form.html", w)
+				br.RenderHtmlFile("upload_photo_form", w)
 			}},
 		// Route{Path: "/sign_up"},
 		// Route{Path: "/login"},
@@ -61,14 +66,15 @@ func (br BrowserRenderer) registerUserRoutes(store app.CalhounStore) {
 	}
 }
 
-func (br BrowserRenderer) registerAssetRoutes(assetPath, fullAssetPath string) {
+func (br BrowserRenderer) registerAssetRoutes(serverAssetPath, fullAssetPath string) {
 	// TODO should use a real asset pipeline eventually
+	assetPath := fmt.Sprintf("/%s/", serverAssetPath)
 	http.Handle(assetPath, http.StripPrefix(assetPath, http.FileServer(http.Dir(fullAssetPath))))
 }
 
 func (br *BrowserRenderer) RenderHtmlFile(filename string, writer http.ResponseWriter) {
 	layoutPath := fmt.Sprintf("%s/layout.html", br.ViewsPath)
-	filepath := fmt.Sprintf("%s/%s", br.ViewsPath, filename)
+	filepath := fmt.Sprintf("%s/%s.html", br.ViewsPath, filename)
 
 	tmpl, err := template.ParseFiles(layoutPath, filepath)
 

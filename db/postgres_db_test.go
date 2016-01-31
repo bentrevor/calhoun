@@ -34,7 +34,6 @@ func TestPostgresDB_OptsToPostgresSelect(t *testing.T) {
 	AssertEquals(t, want, got)
 }
 
-// TODO shared examples?
 func TestPostgresDB_SavingPhotos(t *testing.T) {
 	Describe("PostgresDB: saving photos")
 	postgresDB := NewPostgresTestDB()

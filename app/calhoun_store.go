@@ -8,11 +8,12 @@ type CalhounStore struct {
 	SrvPath string
 }
 
-func (store CalhounStore) SavePhoto(user User, photoFile *multipart.File) (bool, error) {
+func (store CalhounStore) SavePhoto(user User, photoFile *multipart.File) error {
 	photoId := store.savePhotoToDB(user)
 	store.savePhotoToFS(photoFile, photoId)
 
-	return true, nil
+	// TODO return real errors
+	return nil
 }
 
 func (store CalhounStore) savePhotoToDB(user User) int {

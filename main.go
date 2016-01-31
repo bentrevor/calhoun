@@ -31,13 +31,15 @@ func main() {
 	)
 
 	flag.StringVar(&rootDir, "root-dir", "/home/vagrant/go/src/github.com/bentrevor/calhoun", "project root")
-	flag.StringVar(&assetPath, "asset-path", fmt.Sprintf("web/assets", rootDir), "asset path")
+	flag.StringVar(&assetPath, "asset-path", "web/assets", "asset path")
 	flag.StringVar(&srvPath, "srv-path", fmt.Sprintf("%s/images/srv", assetPath), "path to save uploaded files")
 
 	// for now, just http/json server, but eventually cli inputs, mobile apps, etc.
 	flag.StringVar(&ui, "ui", "web", "")
 
 	flag.Parse()
+
+	fullAssetPath := fmt.Sprintf("%s/%s", rootDir, assetPath)
 
 	switch ui {
 	case "web":
@@ -50,7 +52,7 @@ func main() {
 			Store:         store,
 			Renderer:      renderer,
 			AssetPath:     assetPath,
-			FullAssetPath: fmt.Sprintf("%s/%s", rootDir, assetPath),
+			FullAssetPath: fullAssetPath,
 		}
 
 		server.Run("dev")
