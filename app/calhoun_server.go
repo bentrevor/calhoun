@@ -15,26 +15,11 @@ type CalhounServer struct {
 	FullAssetPath string
 }
 
-func (s CalhounServer) Run() {
-	// TODO organize routes
-	routes := []string{
-		"/upload",
-		"/upload_photo",
-		"/sign_up",
-		"/login",
-		"/logout",
-		"/view_photos",
-		// "/view_photo/:id",
+func (s CalhounServer) Run(environment string) {
+	s.Renderer.RegisterRoutes(s.AssetPath, s.FullAssetPath, s.Store)
+
+	if environment != "test" {
+		log.Print("server starting on 8080...\n")
+		log.Fatal(http.ListenAndServe(":8080", nil))
 	}
-
-	for i := 0; i < len(routes); i++ {
-		http.HandleFunc(routes[i], s.Renderer.Handle(routes[i]))
-	}
-
-	// TODO should use a real asset pipeline eventually
-	http.Handle(s.AssetPath, http.StripPrefix(s.AssetPath, http.FileServer(http.Dir(s.FullAssetPath))))
-
-	log.Print("server starting on 8080...\n")
-
-	log.Fatal(http.ListenAndServe(":8080", nil))
 }

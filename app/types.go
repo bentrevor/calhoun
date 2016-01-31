@@ -1,9 +1,6 @@
 package app
 
-import (
-	"mime/multipart"
-	"net/http"
-)
+import "mime/multipart"
 
 // e.g. postgres vs. in-memory
 // the CalhounStore will use this to get a list of photo ids to use (queries will eventually get more
@@ -23,7 +20,7 @@ type CalhounFS interface {
 }
 
 type CalhounRenderer interface {
-	Handle(string) http.HandlerFunc
+	RegisterRoutes(string, string, CalhounStore)
 }
 
 type QueryOpts struct {

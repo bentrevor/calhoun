@@ -44,7 +44,7 @@ func main() {
 		postgresDB := db.NewPostgresDB("dev")
 		realFS := db.NewRealFS(srvPath)
 		store := app.CalhounStore{DB: postgresDB, FS: realFS, SrvPath: srvPath}
-		renderer := web.BrowserRenderer{}
+		renderer := web.BrowserRenderer{ViewsPath: fmt.Sprintf("%s/web/views", rootDir)}
 
 		server := app.CalhounServer{
 			Store:         store,
@@ -53,7 +53,7 @@ func main() {
 			FullAssetPath: fmt.Sprintf("%s/%s", rootDir, assetPath),
 		}
 
-		server.Run()
+		server.Run("dev")
 	default:
 		log.Fatal("can only use web ui for now: `", ui, "` not supported")
 	}
