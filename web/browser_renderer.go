@@ -6,11 +6,11 @@ import (
 	"io"
 	"log"
 
-	. "github.com/bentrevor/calhoun/app"
+	"github.com/bentrevor/calhoun/app"
 )
 
 type Page struct {
-	Yield string
+	PhotoSrcs []string
 }
 
 type BrowserRenderer struct {
@@ -35,9 +35,13 @@ func (br BrowserRenderer) UploadPhoto(w io.Writer) {
 }
 
 func (br BrowserRenderer) UploadPhotoForm(w io.Writer) {
-	fmt.Fprint(w, "this is the upload form")
+	br.renderHtmlFile("upload_photo_form", w, Page{})
 }
 
-func (br BrowserRenderer) ViewPhotos(w io.Writer, photos []Photo) {
-	fmt.Fprint(w, "this is the view photos")
+func (br BrowserRenderer) ViewPhotos(w io.Writer, photos []app.Photo) {
+	srcs := []string{}
+	for _, photo := range photos {
+		srcs = append(srcs, photo.Src)
+	}
+	br.renderHtmlFile("view_photos", w, Page{PhotoSrcs: srcs})
 }

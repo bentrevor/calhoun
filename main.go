@@ -33,7 +33,7 @@ func main() {
 	switch ui {
 	case "web":
 		postgresDB := db.NewPostgresDB("dev")
-		realFS := db.NewRealFS(srvPath)
+		realFS := db.RealFS{RootDir: srvPath}
 		store := app.CalhounStore{DB: postgresDB, FS: realFS, SrvPath: srvPath}
 		renderer := web.BrowserRenderer{ViewsPath: fmt.Sprintf("%s/web/views", rootDir)}
 

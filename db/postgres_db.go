@@ -75,7 +75,6 @@ func (db *PostgresDB) Select(opts QueryOpts) []Photo {
 	query := OptsToPostgres(SelectStatement, opts)
 	rows, err := db.Query(query)
 	defer rows.Close()
-	log.Print(query)
 
 	if err != nil {
 		log.Fatal("\n\n\ngot an error SELECTing photos:\n  ", query, "\nerr:\n  ", err, "\n\n\n")

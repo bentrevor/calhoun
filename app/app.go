@@ -26,6 +26,7 @@ type User struct {
 type Photo struct {
 	Id        int
 	PhotoFile *multipart.File
+	Src       string
 }
 
 func Run(environment string, server CalhounServer) {

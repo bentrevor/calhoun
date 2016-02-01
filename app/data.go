@@ -20,7 +20,6 @@ type CalhounDB interface {
 // I don't really need ReadPhoto() for now, since I just need PhotoId -> <img> tag.  The requests
 // they make hit the FileServer, which handles reading
 type CalhounFS interface {
-	RootDir() string
 	WritePhoto(Photo)
 	CountPhotos() int // mostly for debugging/testing
 }
@@ -48,5 +47,11 @@ func (store CalhounStore) savePhotoToFS(photoFile *multipart.File, photoId int) 
 }
 
 func (store CalhounStore) PhotosForUser(user User) []Photo {
-	return store.DB.Select(QueryOpts{User: user})
+	photos := store.DB.Select(QueryOpts{User: user})
+
+	for _, photo := range photos {
+		photo.Src = store.FS.PhotoSrc(photo.Id)
+	}
+
+	return photosWithSrc
 }

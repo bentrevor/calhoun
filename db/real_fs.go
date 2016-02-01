@@ -12,18 +12,10 @@ import (
 )
 
 type RealFS struct {
-	rootDir string
+	RootDir string
 }
 
-func NewRealFS(srvPath string) *RealFS {
-	return &RealFS{rootDir: srvPath}
-}
-
-func (fs *RealFS) RootDir() string {
-	return fs.rootDir
-}
-
-func (fs *RealFS) WritePhoto(photo Photo) {
+func (fs RealFS) WritePhoto(photo Photo) {
 	photoFilepath := fs.PhotoFilepath(photo)
 	dirs := strings.Split(photoFilepath, "/")
 	photoDir := strings.Join(dirs[:len(dirs)-1], "/")
@@ -47,18 +39,21 @@ func (fs *RealFS) WritePhoto(photo Photo) {
 	}
 }
 
-func (fs *RealFS) CountPhotos() int {
+func (fs RealFS) CountPhotos() int {
 	return 50 // TODO count files in srv directory
 }
 
-func (fs *RealFS) PhotoFilepath(photo Photo) string {
-	paddedId := fmt.Sprintf("%012d", photo.Id)
+func (fs RealFS) PhotoSrc(id int) string {
+	paddedId := fmt.Sprintf("%012d", id)
 	imgMD5 := md5.Sum([]byte(paddedId))
-	hashedImgLocation := fmt.Sprintf("%x/%x/%x",
+
+	return fmt.Sprintf("%x/%x/%x",
 		imgMD5[0],
 		imgMD5[1],
 		imgMD5[2:],
 	)
+}
 
-	return fmt.Sprintf("%s/%s", fs.rootDir, hashedImgLocation)
+func (fs RealFS) PhotoFilepath(photo Photo) string {
+	return fmt.Sprintf("%s/%s", fs.RootDir, fs.PhotoSrc(photo))
 }

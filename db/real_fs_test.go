@@ -24,7 +24,7 @@ func TestRealFS_Filepath(t *testing.T) {
 	want := "/fake/srv/path/9e/d6/3b492437de85736cb562f91f203c"
 
 	photo := Photo{Id: 12}
-	fs := NewRealFS("/fake/srv/path")
+	fs := RealFS{RootDir: "/fake/srv/path"}
 
 	It("takes the md5 hash of (photo_id padded in front with 0s to 12 places)")
 	AssertEquals(t, want, fs.PhotoFilepath(photo))
@@ -47,7 +47,7 @@ func TestRealFS_Writing(t *testing.T) {
 	photo := Photo{Id: 12, PhotoFile: &mpPhoto}
 
 	fsRoot := fmt.Sprintf("%s/testdata", rootDir)
-	fs := NewRealFS(fsRoot)
+	fs := RealFS{RootDir: fsRoot}
 	fs.WritePhoto(photo)
 
 	It("saves to the filesystem")
