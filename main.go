@@ -37,7 +37,7 @@ func main() {
 		store := app.CalhounStore{DB: postgresDB, FS: realFS, SrvPath: srvPath}
 		renderer := web.BrowserRenderer{ViewsPath: fmt.Sprintf("%s/web/views", rootDir)}
 
-		calhoun := Calhoun{
+		calhoun := app.Calhoun{
 			Store:    store,
 			Renderer: renderer,
 		}

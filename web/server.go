@@ -8,7 +8,6 @@ import (
 	"github.com/bentrevor/calhoun/app"
 )
 
-// just take in web request, parse, and pass to Calhoun
 type WebServer struct {
 	App           app.CalhounApp
 	AssetPath     string

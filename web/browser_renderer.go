@@ -30,14 +30,14 @@ func (br *BrowserRenderer) renderHtmlFile(filename string, writer io.Writer, pag
 	tmpl.Execute(writer, page)
 }
 
-func (br *BrowserRenderer) UploadPhoto(w io.Writer) {
+func (br BrowserRenderer) UploadPhoto(w io.Writer) {
 	br.renderHtmlFile("upload_success", w, Page{})
 }
 
-func (br *BrowserRenderer) UploadPhotoForm(w io.Writer) {
+func (br BrowserRenderer) UploadPhotoForm(w io.Writer) {
 	fmt.Fprint(w, "this is the upload form")
 }
 
-func (br *BrowserRenderer) ViewPhotos(w io.Writer, photos []Photo) {
+func (br BrowserRenderer) ViewPhotos(w io.Writer, photos []Photo) {
 	fmt.Fprint(w, "this is the view photos")
 }

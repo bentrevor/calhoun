@@ -3,13 +3,13 @@ package app
 import (
 	"fmt"
 	"io"
-	"os"
+	"mime/multipart"
 )
 
 type CalhounApp interface {
-	UploadPhoto(io.Writer, *os.File)
+	UploadPhoto(io.Writer, *multipart.File)
 	UploadPhotoForm(io.Writer)
-	ViewPhotos(io.Writer, []Photo)
+	ViewPhotos(io.Writer)
 }
 
 type Calhoun struct {
@@ -25,10 +25,7 @@ type User struct {
 
 type Photo struct {
 	Id        int
-	PhotoFile *os.File
-}
-
-type CalhounFile struct {
+	PhotoFile *multipart.File
 }
 
 func Run(environment string, server CalhounServer) {
@@ -39,7 +36,7 @@ func Run(environment string, server CalhounServer) {
 	}
 }
 
-func (c Calhoun) UploadPhoto(w io.Writer, file *os.File) {
+func (c Calhoun) UploadPhoto(w io.Writer, file *multipart.File) {
 	user := User{Id: 1, Name: "God"} // until auth middleware is implemented
 	err := c.Store.SavePhoto(user, file)
 
