@@ -37,13 +37,18 @@ func main() {
 		store := app.CalhounStore{DB: postgresDB, FS: realFS, SrvPath: srvPath}
 		renderer := web.BrowserRenderer{ViewsPath: fmt.Sprintf("%s/web/views", rootDir)}
 
+		calhoun := Calhoun{
+			Store:    store,
+			Renderer: renderer,
+		}
+
 		server := web.WebServer{
-			Renderer:      renderer,
+			App:           calhoun,
 			AssetPath:     assetPath,
 			FullAssetPath: fullAssetPath,
 		}
 
-		app.Run("dev", server, store)
+		app.Run("dev", server)
 	case "cli":
 		log.Fatal("cli not implemented yet")
 	default:

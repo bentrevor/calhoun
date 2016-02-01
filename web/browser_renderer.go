@@ -5,8 +5,8 @@ import (
 	"html/template"
 	"io"
 	"log"
-	"net/http"
-	"os"
+
+	. "github.com/bentrevor/calhoun/app"
 )
 
 type Page struct {
@@ -17,7 +17,7 @@ type BrowserRenderer struct {
 	ViewsPath string
 }
 
-func (br *BrowserRenderer) renderHtmlFile(filename string, writer http.ResponseWriter, page Page) {
+func (br *BrowserRenderer) renderHtmlFile(filename string, writer io.Writer, page Page) {
 	layoutPath := fmt.Sprintf("%s/layout.html", br.ViewsPath)
 	filepath := fmt.Sprintf("%s/%s.html", br.ViewsPath, filename)
 
@@ -30,16 +30,8 @@ func (br *BrowserRenderer) renderHtmlFile(filename string, writer http.ResponseW
 	tmpl.Execute(writer, page)
 }
 
-func (br *BrowserRenderer) UploadPhoto(w io.Writer, file *os.File) {
-	user := User{Id: 1, Name: "God"} // until auth middleware is implemented
-	err := s.Store.SavePhoto(user, file)
-
-	if err == nil {
-		br.RenderHtmlFile("upload_success", w, Page{})
-	} else {
-		fmt.Fprintln(w, "error saving photo: ", err)
-		return
-	}
+func (br *BrowserRenderer) UploadPhoto(w io.Writer) {
+	br.renderHtmlFile("upload_success", w, Page{})
 }
 
 func (br *BrowserRenderer) UploadPhotoForm(w io.Writer) {

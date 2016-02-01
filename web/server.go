@@ -4,9 +4,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/bentrevor/calhoun/app"
 )
 
+// just take in web request, parse, and pass to Calhoun
 type WebServer struct {
+	App           app.CalhounApp
 	AssetPath     string
 	FullAssetPath string
 }
@@ -21,7 +25,7 @@ func (s WebServer) RegisterRoutes() {
 	s.registerAssetRoutes()
 }
 
-func (s WebServer) ListenAndServe() {
+func (s WebServer) Start() {
 	log.Print("server starting on 8080...\n")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
@@ -41,15 +45,15 @@ func (s WebServer) registerPageRoutes() {
 	}
 }
 
-func (s WebServer) registerAssetRoutes() http.HandlerFunc {
+func (s WebServer) registerAssetRoutes() {
 	// TODO should use a real asset pipeline eventually
 	assetPath := fmt.Sprintf("/%s/", s.AssetPath)
 	http.Handle(assetPath, http.StripPrefix(assetPath, http.FileServer(http.Dir(s.FullAssetPath))))
 }
 
 func (s WebServer) uploadPhotoForm() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		s.Renderer.UploadPhotoForm(w)
+	return func(w http.ResponseWriter, _ *http.Request) {
+		s.App.UploadPhotoForm(w)
 	}
 }
 
@@ -63,13 +67,12 @@ func (s WebServer) uploadPhoto() http.HandlerFunc {
 			return
 		}
 
-		s.Renderer.UploadPhoto(w, &file)
+		s.App.UploadPhoto(w, &file)
 	}
 }
 
 func (s WebServer) viewPhotos() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		photos := s.Store.PhotosForUser(User{Id: 1, Name: "God"})
-		s.Renderer.ViewPhotos(w, photos)
+	return func(w http.ResponseWriter, _ *http.Request) {
+		s.App.ViewPhotos(w)
 	}
 }

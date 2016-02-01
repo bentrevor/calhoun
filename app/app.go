@@ -1,44 +1,23 @@
 package app
 
 import (
+	"fmt"
 	"io"
-	"mime/multipart"
 	"os"
 )
 
-type CalhounServer interface {
-	RegisterRoutes()
-	Start()
-}
-
-type CalhounRenderer interface {
-	UploadPhotoForm(io.Writer)
+type CalhounApp interface {
 	UploadPhoto(io.Writer, *os.File)
+	UploadPhotoForm(io.Writer)
 	ViewPhotos(io.Writer, []Photo)
 }
 
-// e.g. postgres vs. in-memory
-// the CalhounStore will use this to get a list of photo ids to use (queries will eventually get more
-// complicated than `WHERE user_id = %d`)
-type CalhounDB interface {
-	Insert(QueryOpts) int
-	Select(QueryOpts) []Photo
+type Calhoun struct {
+	Store    CalhounStore
+	Renderer CalhounRenderer
 }
 
-// e.g. filesystem vs. S3
-// I don't really need ReadPhoto() for now, since I just need PhotoId -> <img> tag.  The requests
-// they make hit the FileServer, which handles reading
-type CalhounFS interface {
-	RootDir() string
-	WritePhoto(Photo)
-	CountPhotos() int // mostly for debugging/testing
-}
-
-type QueryOpts struct {
-	User  User
-	Photo Photo
-}
-
+// "domain models"
 type User struct {
 	Id   int64
 	Name string
@@ -46,13 +25,37 @@ type User struct {
 
 type Photo struct {
 	Id        int
-	PhotoFile *multipart.File
+	PhotoFile *os.File
 }
 
-func Run(environment string, server CalhounServer, store CalhounStore) {
+type CalhounFile struct {
+}
+
+func Run(environment string, server CalhounServer) {
 	server.RegisterRoutes()
 
 	if environment != "test" {
 		server.Start()
 	}
+}
+
+func (c Calhoun) UploadPhoto(w io.Writer, file *os.File) {
+	user := User{Id: 1, Name: "God"} // until auth middleware is implemented
+	err := c.Store.SavePhoto(user, file)
+
+	if err == nil {
+		c.Renderer.UploadPhoto(w)
+	} else {
+		fmt.Fprintln(w, "error saving photo: ", err)
+	}
+}
+
+func (c Calhoun) UploadPhotoForm(w io.Writer) {
+	c.Renderer.UploadPhotoForm(w)
+}
+
+func (c Calhoun) ViewPhotos(w io.Writer) {
+	user := User{Id: 1, Name: "God"} // until auth middleware is implemented
+	photos := c.Store.PhotosForUser(user)
+	c.Renderer.ViewPhotos(w, photos)
 }
