@@ -2,9 +2,7 @@ package main
 
 import (
 	"fmt"
-	"html"
 	"log"
-	"net/http"
 
 	"github.com/bentrevor/calhoun/app"
 	"github.com/bentrevor/calhoun/db"
@@ -12,15 +10,6 @@ import (
 
 	"github.com/namsral/flag"
 )
-
-func RootHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "some request info:\n%q\n%q\n%q\n%q",
-		html.EscapeString(r.URL.Path),
-		html.EscapeString(r.Host),
-		html.EscapeString(r.RequestURI),
-		html.EscapeString(r.RemoteAddr),
-	)
-}
 
 func main() {
 	var (
@@ -48,14 +37,15 @@ func main() {
 		store := app.CalhounStore{DB: postgresDB, FS: realFS, SrvPath: srvPath}
 		renderer := web.BrowserRenderer{ViewsPath: fmt.Sprintf("%s/web/views", rootDir)}
 
-		server := app.CalhounServer{
-			Store:         store,
+		server := web.WebServer{
 			Renderer:      renderer,
 			AssetPath:     assetPath,
 			FullAssetPath: fullAssetPath,
 		}
 
-		server.Run("dev")
+		app.Run("dev", server, store)
+	case "cli":
+		log.Fatal("cli not implemented yet")
 	default:
 		log.Fatal("can only use web ui for now: `", ui, "` not supported")
 	}

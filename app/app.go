@@ -1,6 +1,21 @@
 package app
 
-import "mime/multipart"
+import (
+	"io"
+	"mime/multipart"
+	"os"
+)
+
+type CalhounServer interface {
+	RegisterRoutes()
+	Start()
+}
+
+type CalhounRenderer interface {
+	UploadPhotoForm(io.Writer)
+	UploadPhoto(io.Writer, *os.File)
+	ViewPhotos(io.Writer, []Photo)
+}
 
 // e.g. postgres vs. in-memory
 // the CalhounStore will use this to get a list of photo ids to use (queries will eventually get more
@@ -19,10 +34,6 @@ type CalhounFS interface {
 	CountPhotos() int // mostly for debugging/testing
 }
 
-type CalhounRenderer interface {
-	RegisterRoutes(string, string, CalhounStore)
-}
-
 type QueryOpts struct {
 	User  User
 	Photo Photo
@@ -36,4 +47,12 @@ type User struct {
 type Photo struct {
 	Id        int
 	PhotoFile *multipart.File
+}
+
+func Run(environment string, server CalhounServer, store CalhounStore) {
+	server.RegisterRoutes()
+
+	if environment != "test" {
+		server.Start()
+	}
 }
