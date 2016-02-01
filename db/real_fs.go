@@ -55,5 +55,5 @@ func (fs RealFS) PhotoSrc(id int) string {
 }
 
 func (fs RealFS) PhotoFilepath(photo Photo) string {
-	return fmt.Sprintf("%s/%s", fs.RootDir, fs.PhotoSrc(photo))
+	return fmt.Sprintf("%s/%s", fs.RootDir, fs.PhotoSrc(photo.Id))
 }

@@ -14,7 +14,8 @@ type Page struct {
 }
 
 type BrowserRenderer struct {
-	ViewsPath string
+	ViewsPath  string
+	PhotosPath string
 }
 
 func (br *BrowserRenderer) renderHtmlFile(filename string, writer io.Writer, page Page) {
@@ -41,7 +42,7 @@ func (br BrowserRenderer) UploadPhotoForm(w io.Writer) {
 func (br BrowserRenderer) ViewPhotos(w io.Writer, photos []app.Photo) {
 	srcs := []string{}
 	for _, photo := range photos {
-		srcs = append(srcs, photo.Src)
+		srcs = append(srcs, fmt.Sprintf("%s/%s", br.PhotosPath, photo.Src))
 	}
 	br.renderHtmlFile("view_photos", w, Page{PhotoSrcs: srcs})
 }

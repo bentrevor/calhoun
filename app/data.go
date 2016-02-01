@@ -21,6 +21,7 @@ type CalhounDB interface {
 // they make hit the FileServer, which handles reading
 type CalhounFS interface {
 	WritePhoto(Photo)
+	PhotoSrc(int) string
 	CountPhotos() int // mostly for debugging/testing
 }
 
@@ -49,9 +50,9 @@ func (store CalhounStore) savePhotoToFS(photoFile *multipart.File, photoId int) 
 func (store CalhounStore) PhotosForUser(user User) []Photo {
 	photos := store.DB.Select(QueryOpts{User: user})
 
-	for _, photo := range photos {
-		photo.Src = store.FS.PhotoSrc(photo.Id)
+	for i := range photos {
+		photos[i].Src = store.FS.PhotoSrc(photos[i].Id)
 	}
 
-	return photosWithSrc
+	return photos
 }
