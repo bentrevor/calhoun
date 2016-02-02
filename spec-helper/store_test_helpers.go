@@ -10,6 +10,9 @@ type MemoryDB struct {
 	Photos map[string][]Photo
 }
 
+// TODO get from an env variable or something
+func TestdataPath() string { return "/home/vagrant/go/src/github.com/bentrevor/calhoun/testdata" }
+
 func NewMemoryDB() *MemoryDB {
 	memoryDB := MemoryDB{Photos: make(map[string][]Photo)}
 	return &memoryDB
@@ -42,8 +45,9 @@ func (fs *MemoryFS) PhotoSrc(id int) string {
 	return fmt.Sprintf("%s/%d", fs.SrvPath, id)
 }
 
-func (fs *MemoryFS) WritePhoto(photo Photo) {
+func (fs *MemoryFS) WritePhoto(photo Photo) error {
 	fs.Photos[string(photo.Id)] = photo
+	return nil
 }
 
 func (fs *MemoryFS) CountPhotos() int {

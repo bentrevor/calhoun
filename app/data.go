@@ -20,7 +20,7 @@ type CalhounDB interface {
 // I don't really need ReadPhoto() for now, since I just need PhotoId -> <img> tag.  The requests
 // they make hit the FileServer, which handles reading
 type CalhounFS interface {
-	WritePhoto(Photo)
+	WritePhoto(Photo) error
 	PhotoSrc(int) string
 	CountPhotos() int // mostly for debugging/testing
 }
@@ -32,24 +32,20 @@ type QueryOpts struct {
 
 func (store CalhounStore) SavePhoto(user User, photoFile *multipart.File) error {
 	photoId := store.savePhotoToDB(user)
-	store.savePhotoToFS(photoFile, photoId)
-
-	// TODO return real errors
-	return nil
+	return store.savePhotoToFS(photoFile, photoId)
 }
 
 func (store CalhounStore) savePhotoToDB(user User) int {
 	return store.DB.Insert(QueryOpts{User: user})
 }
 
-func (store CalhounStore) savePhotoToFS(photoFile *multipart.File, photoId int) {
+func (store CalhounStore) savePhotoToFS(photoFile *multipart.File, photoId int) error {
 	photo := Photo{Id: photoId, PhotoFile: photoFile}
-	store.FS.WritePhoto(photo)
+	return store.FS.WritePhoto(photo)
 }
 
 func (store CalhounStore) PhotosForUser(user User) []Photo {
 	photos := store.DB.Select(QueryOpts{User: user})
-	// log.Fatal(photos)
 
 	for i := range photos {
 		photos[i].Src = store.FS.PhotoSrc(photos[i].Id)

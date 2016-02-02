@@ -25,7 +25,17 @@ func Assert(tb testing.TB, condition bool, v ...interface{}) {
 func AssertEquals(tb testing.TB, exp, act interface{}) {
 	if !reflect.DeepEqual(exp, act) {
 		_, file, line, _ := runtime.Caller(1)
-		fmt.Printf("\n\033[31m%s:%d:\n\n\texp: %#v\n\n\tgot: %#v\033[39m\n\n", filepath.Base(file), line, exp, act)
+		fmt.Printf("\n\033[31m%s:%d:\n\n\texpected: %#v\n\n\tto eq: %#v\033[39m\n\n", filepath.Base(file), line, exp, act)
+		tb.FailNow()
+	} else {
+		fmt.Printf("\033[32m.\033[39m")
+	}
+}
+
+func AssertNotEquals(tb testing.TB, exp, act interface{}) {
+	if reflect.DeepEqual(exp, act) {
+		_, file, line, _ := runtime.Caller(1)
+		fmt.Printf("\n\033[31m%s:%d:\n\n\texpected: %#v\n\n\tnot to eq: %#v\033[39m\n\n", filepath.Base(file), line, exp, act)
 		tb.FailNow()
 	} else {
 		fmt.Printf("\033[32m.\033[39m")

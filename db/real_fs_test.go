@@ -32,8 +32,8 @@ func TestRealFS_Filepath(t *testing.T) {
 
 func TestRealFS_Writing(t *testing.T) {
 	Describe("RealFS: writing file")
-	rootDir := "/home/vagrant/go/src/github.com/bentrevor/calhoun"
-	photoPath := fmt.Sprintf("%s/web/assets/images/dog.png", rootDir)
+	rootDir := TestdataPath()
+	photoPath := fmt.Sprintf("%s/images/dog.png", rootDir)
 
 	photoFile, err := os.Open(photoPath)
 	defer photoFile.Close()
@@ -46,16 +46,50 @@ func TestRealFS_Writing(t *testing.T) {
 	mpPhoto := multipart.File(photoFile)
 	photo := Photo{Id: 12, PhotoFile: &mpPhoto}
 
-	fsRoot := fmt.Sprintf("%s/testdata", rootDir)
+	fsRoot := fmt.Sprintf("%s/srv", rootDir)
 	fs := RealFS{RootDir: fsRoot}
 	fs.WritePhoto(photo)
 
 	It("saves to the filesystem")
+
 	_, err = os.Stat(fs.PhotoFilepath(photo))
-	if err != nil {
-		log.Fatal("in test: ", err)
-	}
 	Assert(t, !os.IsNotExist(err))
+
+	// TODO defer these
+	os.RemoveAll(fsRoot)
+	os.Mkdir(fsRoot, 0755)
+}
+
+func TestRealFS_Errors(t *testing.T) {
+	Describe("RealFS: errors")
+	rootDir := TestdataPath()
+	photoPath := fmt.Sprintf("%s/images/dog.png", rootDir)
+
+	photoFile, err := os.Open(photoPath)
+	defer photoFile.Close()
+
+	if err != nil {
+		log.Fatal("in test 2: ", err)
+	}
+
+	mpPhoto := multipart.File(photoFile)
+	photo := Photo{Id: 12, PhotoFile: &mpPhoto}
+
+	fsRoot := fmt.Sprintf("%s/srv", rootDir)
+	os.RemoveAll(fsRoot)
+	os.Mkdir(fsRoot, 0755)
+
+	fs := RealFS{RootDir: fsRoot}
+
+	It("raises an error when the filepath already exists")
+	// this is actually pretty likely to happen - my filesystem and database sequence have to be
+	// synchronized, so it's only a matter of time before they get out of sync
+
+	_ = fs.WritePhoto(photo)
+	err = fs.WritePhoto(photo)
+
+	AssertNotEquals(t, err, nil)
+
 	os.RemoveAll(fsRoot)
 	os.Mkdir(fsRoot, 0755)
 }
