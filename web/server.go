@@ -19,6 +19,17 @@ type Route struct {
 	HandlerFunc http.HandlerFunc
 }
 
+type Middleware interface {
+	Chain(http.HandlerFunc) http.HandlerFunc
+}
+
+type LoggingMW struct{}
+
+func (mw LoggingMW) Chain(f http.HandlerFunc) http.HandlerFunc {
+	log.Print("hit the logging middleware")
+	return f
+}
+
 func (s WebServer) RegisterRoutes() {
 	s.registerPageRoutes()
 	s.registerAssetRoutes()
@@ -33,7 +44,11 @@ func (s WebServer) registerPageRoutes() {
 	routes := []Route{
 		Route{Path: "/upload", HandlerFunc: s.uploadPhoto()},
 		Route{Path: "/upload_photo", HandlerFunc: s.uploadPhotoForm()},
-		Route{Path: "/view_photos", HandlerFunc: s.viewPhotos()},
+		Route{
+			Path:        "/view_photos",
+			HandlerFunc: s.viewPhotos(),
+			Middlewares: []Middleware{NewMiddleware()},
+		},
 		// Route{Path: "/sign_up"},
 		// Route{Path: "/login"},
 		// Route{Path: "/logout"},

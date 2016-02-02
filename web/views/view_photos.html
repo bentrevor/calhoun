@@ -1,7 +1,7 @@
 {{define "yield"}}
 
-  {{range .PhotoSrcs}}
-    <img src="{{.}}">
+  {{range .PhotoTags}}
+    <img src="{{.Src}}" class="{{.ClassName}}">
   {{else}}
     <p>no photos saved yet.</p>
   {{end}}

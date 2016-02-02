@@ -17,7 +17,6 @@ type Calhoun struct {
 	Renderer CalhounRenderer
 }
 
-// "domain models"
 type User struct {
 	Id   int64
 	Name string

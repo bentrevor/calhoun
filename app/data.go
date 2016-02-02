@@ -49,6 +49,7 @@ func (store CalhounStore) savePhotoToFS(photoFile *multipart.File, photoId int) 
 
 func (store CalhounStore) PhotosForUser(user User) []Photo {
 	photos := store.DB.Select(QueryOpts{User: user})
+	// log.Fatal(photos)
 
 	for i := range photos {
 		photos[i].Src = store.FS.PhotoSrc(photos[i].Id)

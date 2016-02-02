@@ -35,7 +35,11 @@ func main() {
 		postgresDB := db.NewPostgresDB("dev")
 		realFS := db.RealFS{RootDir: srvPath}
 		store := app.CalhounStore{DB: postgresDB, FS: realFS, SrvPath: srvPath}
-		renderer := web.BrowserRenderer{ViewsPath: fmt.Sprintf("%s/web/views", rootDir), PhotosPath: srvPath}
+
+		renderer := web.BrowserRenderer{
+			ViewsPath:  fmt.Sprintf("%s/web/views", rootDir),
+			PhotosPath: srvPath,
+		}
 
 		calhoun := app.Calhoun{
 			Store:    store,

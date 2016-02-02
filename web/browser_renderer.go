@@ -10,7 +10,12 @@ import (
 )
 
 type Page struct {
-	PhotoSrcs []string
+	PhotoTags []PhotoTag
+}
+
+type PhotoTag struct {
+	Src       string
+	ClassName string
 }
 
 type BrowserRenderer struct {
@@ -40,9 +45,14 @@ func (br BrowserRenderer) UploadPhotoForm(w io.Writer) {
 }
 
 func (br BrowserRenderer) ViewPhotos(w io.Writer, photos []app.Photo) {
-	srcs := []string{}
+	photoTags := []PhotoTag{}
+
 	for _, photo := range photos {
-		srcs = append(srcs, fmt.Sprintf("%s/%s", br.PhotosPath, photo.Src))
+		photoTags = append(photoTags, PhotoTag{
+			Src:       fmt.Sprintf("%s/%s", br.PhotosPath, photo.Src),
+			ClassName: fmt.Sprintf("image_%d", photo.Id),
+		})
 	}
-	br.renderHtmlFile("view_photos", w, Page{PhotoSrcs: srcs})
+
+	br.renderHtmlFile("view_photos", w, Page{PhotoTags: photoTags})
 }

@@ -8,19 +8,12 @@ import (
 	. "github.com/bentrevor/calhoun/spec-helper"
 )
 
-func TestCalhounStore_Creation(t *testing.T) {
-	Describe("CalhounStore: creation")
-
-	It("injects the FS, DB, and SrvPath")
-	store := CalhounStore{FS: NewMemoryFS(), DB: NewMemoryDB(), SrvPath: "/fake/srv/path"}
-	AssertEquals(t, "/fake/srv/path", store.SrvPath)
-}
-
 func TestCalhounStore_SavingPhotos(t *testing.T) {
 	Describe("CalhounStore: saving photos")
 	user := User{Name: "ben"}
 	photo := Photo{Id: 1}
-	store := CalhounStore{FS: NewMemoryFS(), DB: NewMemoryDB(), SrvPath: "/fake/srv/path"}
+	srvPath := "/fake/srv/path"
+	store := CalhounStore{FS: NewMemoryFS(srvPath), DB: NewMemoryDB(), SrvPath: srvPath}
 
 	store.SavePhoto(user, photo.PhotoFile)
 
@@ -29,4 +22,18 @@ func TestCalhounStore_SavingPhotos(t *testing.T) {
 
 	It("saves the file to the filesystem")
 	AssertEquals(t, 1, store.FS.CountPhotos())
+}
+
+func TestCalhounStore_LoadingPhotos(t *testing.T) {
+	Describe("CalhounStore: loading photos")
+	user := User{Name: "ben"}
+	photo := Photo{Id: 1}
+	srvPath := "/fake/srv/path"
+	store := CalhounStore{FS: NewMemoryFS(srvPath), DB: NewMemoryDB(), SrvPath: srvPath}
+
+	store.SavePhoto(user, photo.PhotoFile)
+	photos := store.PhotosForUser(user)
+
+	It("adds the Photo.Src")
+	AssertEquals(t, "/fake/srv/path/1", photos[0].Src)
 }
