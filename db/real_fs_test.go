@@ -83,7 +83,7 @@ func TestRealFS_Errors(t *testing.T) {
 
 	It("raises an error when the filepath already exists")
 	// this is actually pretty likely to happen - my filesystem and database sequence have to be
-	// synchronized, so it's only a matter of time before they get out of sync
+	// synchronized, so it's only a matter of "time" before they get out of sync
 
 	_ = fs.WritePhoto(photo)
 	err = fs.WritePhoto(photo)
