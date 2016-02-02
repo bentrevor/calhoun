@@ -17,6 +17,7 @@ type WebServer struct {
 type Route struct {
 	Path        string
 	HandlerFunc http.HandlerFunc
+	Middlewares []Middleware
 }
 
 type Middleware interface {
@@ -26,8 +27,28 @@ type Middleware interface {
 type LoggingMW struct{}
 
 func (mw LoggingMW) Chain(f http.HandlerFunc) http.HandlerFunc {
-	log.Print("hit the logging middleware")
-	return f
+	return func(w http.ResponseWriter, r *http.Request) {
+		log.Print("\n\nhit the logging middleware!!!\n\n")
+		f(w, r)
+	}
+}
+
+type LoggingMW2 struct{}
+
+func (mw LoggingMW2) Chain(f http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		log.Print("\n\nhit the logging middleware 2!!!\n\n")
+		f(w, r)
+	}
+}
+
+type LoggingMW3 struct{}
+
+func (mw LoggingMW3) Chain(f http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		log.Print("\n\nhit the logging middleware 3!!!\n\n")
+		f(w, r)
+	}
 }
 
 func (s WebServer) RegisterRoutes() {
@@ -43,11 +64,15 @@ func (s WebServer) Start() {
 func (s WebServer) registerPageRoutes() {
 	routes := []Route{
 		Route{Path: "/upload", HandlerFunc: s.uploadPhoto()},
-		Route{Path: "/upload_photo", HandlerFunc: s.uploadPhotoForm()},
+		Route{
+			Path:        "/upload_photo",
+			HandlerFunc: s.uploadPhotoForm(),
+			Middlewares: []Middleware{LoggingMW3{}, LoggingMW2{}},
+		},
 		Route{
 			Path:        "/view_photos",
 			HandlerFunc: s.viewPhotos(),
-			Middlewares: []Middleware{NewMiddleware()},
+			Middlewares: []Middleware{LoggingMW{}, LoggingMW3{}, LoggingMW3{}, LoggingMW2{}},
 		},
 		// Route{Path: "/sign_up"},
 		// Route{Path: "/login"},
@@ -55,7 +80,25 @@ func (s WebServer) registerPageRoutes() {
 	}
 
 	for i := 0; i < len(routes); i++ {
-		http.HandleFunc(routes[i].Path, routes[i].HandlerFunc)
+		route := routes[i]
+
+		http.HandleFunc(route.Path, route.handlerFunc())
+	}
+}
+
+func (route Route) handlerFunc() http.HandlerFunc {
+	if len(route.Middlewares) == 0 {
+		return route.HandlerFunc
+	} else {
+		return route.handlerFuncWithMiddleware(0)
+	}
+}
+
+func (route Route) handlerFuncWithMiddleware(count int) http.HandlerFunc {
+	if count >= len(route.Middlewares) {
+		return route.HandlerFunc
+	} else {
+		return route.Middlewares[count].Chain(route.handlerFuncWithMiddleware(count + 1))
 	}
 }
 
