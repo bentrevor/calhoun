@@ -44,7 +44,7 @@ func LoggingMW2(f CalhounHandler) CalhounHandler {
 	}
 }
 
-func (route Route) HandlerFunc() CalhounHandler {
+func (route Route) BuildCalhounHandler() CalhounHandler {
 	return route.applyMiddleware(0)
 }
 

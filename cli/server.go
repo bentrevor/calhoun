@@ -3,24 +3,30 @@ package cli
 import (
 	"io"
 
-	"github.com/bentrevor/calhoun/app"
+	. "github.com/bentrevor/calhoun/app"
 )
 
 type CliServer struct {
-	App     app.CalhounApp
+	App     CalhounApp
 	RootDir string
 	Routes  []Route
 }
 
-type CliHandler func(io.Writer, string)
+type CliHandler func(io.Writer, CliRequest)
 
 func (s CliServer) RegisterRoutes() {
 	s.Routes = []Route{
 		Route{
 			Path:            "-upload",
-			BaseHandlerFunc: s.uploadPhoto,
-			Middlewares:     []app.Middleware{app.LoggingMW{}},
+			BaseHandlerFunc: s.uploadPhoto(),
+			Middlewares:     []Middleware{LoggingMW},
 		},
+	}
+}
+
+func (s CliServer) buildHandlerFunc(f CalhoundHandler) CliHandler {
+	return func(w io.Writer, r *CliRequest) {
+		f(w, r)
 	}
 }
 
@@ -31,14 +37,18 @@ func (s CliServer) Start() {
 	// input := "./calhoun -upload -file /path/to/file"
 	// cmd := "-upload"
 	// args := "-file /path/to/file"
+
 	// route := s.Routes.Where(Path: cmd)
-	// handler := route.HandlerFunc()
+	// calhounHandler := route.BuildCalhounHandler()
+	// handler := s.buildHandlerFunc(calhounHandler)
 	// handler(args)
 }
 
-func (s CliServer) uploadPhoto(w io.Writer, input string) {
-	// input == "-file /path/to/file"
+func (s CliServer) uploadPhoto() CalhounHandler {
+	return func(w io.Writer, r *CalhounRequest) {
+		// input == "-file /path/to/file"
 
-	// file := os.Read("/path/to/file")
-	// app.UploadPhoto(w, &file)
+		// file := os.Read("/path/to/file")
+		// s.App.UploadPhoto(w, &file)
+	}
 }

@@ -2,6 +2,7 @@ package web
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 
@@ -16,24 +17,24 @@ type WebServer struct {
 }
 
 func (s WebServer) RegisterRoutes() {
-	routes := []Route{
+	s.Routes = []Route{
 		Route{
 			Path:            "/upload",
-			BaseHandlerFunc: s.uploadPhoto,
+			BaseHandlerFunc: s.uploadPhoto(),
 		},
 		Route{
 			Path:            "/upload_photo",
-			BaseHandlerFunc: s.uploadPhotoForm,
-			Middlewares:     []Middleware{LoggingMW{}, LoggingMW2{}},
+			BaseHandlerFunc: s.uploadPhotoForm(),
+			Middlewares:     []Middleware{LoggingMW, LoggingMW2},
 		},
 		Route{
 			Path:            "/view_photos",
-			BaseHandlerFunc: s.viewPhotos,
-			Middlewares:     []Middleware{LoggingMW{}},
+			BaseHandlerFunc: s.viewPhotos(),
+			Middlewares:     []Middleware{LoggingMW},
 		},
 	}
 
-	s.registerPageRoutes(routes)
+	s.registerPageRoutes()
 	s.registerAssetRoutes()
 }
 
@@ -42,11 +43,19 @@ func (WebServer) Start() {
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-func (WebServer) registerPageRoutes(routes []Route) {
-	for i := 0; i < len(routes); i++ {
-		route := routes[i]
+func (s WebServer) registerPageRoutes() {
+	for i := 0; i < len(s.Routes); i++ {
+		route := s.Routes[i]
+		hf := route.BuildCalhounHandler()
 
-		http.HandleFunc(route.Path, route.HandlerFunc())
+		http.HandleFunc(route.Path, s.buildHttpHandlerFunc(hf))
+	}
+}
+
+func (s WebServer) buildHttpHandlerFunc(f CalhounHandler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		calhounReq := CalhounRequest{Url: r.URL.Path, Body: "io.ReadCloser stuff"}
+		f(w, &calhounReq)
 	}
 }
 
@@ -56,22 +65,29 @@ func (s WebServer) registerAssetRoutes() {
 	http.Handle(assetPath, http.StripPrefix(assetPath, http.FileServer(http.Dir(s.FullAssetPath))))
 }
 
-func (s WebServer) uploadPhotoForm(w http.ResponseWriter, _ *http.Request) {
-	s.App.UploadPhotoForm(w)
-}
-
-func (s WebServer) uploadPhoto(w http.ResponseWriter, r *http.Request) {
-	file, _, err := r.FormFile("photoUpload")
-	defer file.Close()
-
-	if err != nil {
-		fmt.Fprintln(w, "error reading photo upload: ", err)
-		return
+func (s WebServer) uploadPhotoForm() CalhounHandler {
+	return func(w io.Writer, _ *CalhounRequest) {
+		s.App.UploadPhotoForm(w)
 	}
-
-	s.App.UploadPhoto(w, &file)
 }
 
-func (s WebServer) viewPhotos(w http.ResponseWriter, _ *http.Request) {
-	s.App.ViewPhotos(w)
+func (s WebServer) uploadPhoto() CalhounHandler {
+	return func(w io.Writer, r *CalhounRequest) {
+		// CalhounRequest.FormFile undefined
+		file, _, err := r.FormFile("photoUpload")
+		defer file.Close()
+
+		if err != nil {
+			fmt.Fprintln(w, "error reading photo upload: ", err)
+			return
+		}
+
+		s.App.UploadPhoto(w, &file)
+	}
+}
+
+func (s WebServer) viewPhotos() CalhounHandler {
+	return func(w io.Writer, _ *CalhounRequest) {
+		s.App.ViewPhotos(w)
+	}
 }
