@@ -1,37 +1,34 @@
 package web_test
 
 import (
+	"net/http"
+	"testing"
+
 	. "github.com/bentrevor/calhoun/web"
 
 	. "github.com/bentrevor/calhoun/spec-helper"
 )
 
-// func TestCalhounStore_SavingPhotos(t *testing.T) {
-// 	Describe("CalhounStore: saving photos")
-// 	user := User{Name: "ben"}
-// 	photo := Photo{Id: 1}
-// 	srvPath := "/fake/srv/path"
-// 	store := CalhounStore{FS: NewMemoryFS(srvPath), DB: NewMemoryDB(), SrvPath: srvPath}
+type FakeMW struct {
+	Name string
+}
 
-// 	store.SavePhoto(user, photo.PhotoFile)
+var middlewareCalled = []Middleware{}
 
-// 	It("stores it in the db")
-// 	AssertEquals(t, 1, len(store.PhotosForUser(user)))
+func (mw FakeMW) Chain(f http.HandlerFunc) http.HandlerFunc {
+	return f
+}
 
-// 	It("saves the file to the filesystem")
-// 	AssertEquals(t, 1, store.FS.CountPhotos())
-// }
+// routes
+func TestWebServer_Middleware(t *testing.T) {
+	// testApp := app.Calhoun{}
+	// server := WebServer{App: testApp}
 
-// func TestCalhounStore_LoadingPhotos(t *testing.T) {
-// 	Describe("CalhounStore: loading photos")
-// 	user := User{Name: "ben"}
-// 	photo := Photo{Id: 1}
-// 	srvPath := "/fake/srv/path"
-// 	store := CalhounStore{FS: NewMemoryFS(srvPath), DB: NewMemoryDB(), SrvPath: srvPath}
+	Describe("Server: middleware")
+	It("applies middleware in order before the HandlerFunc")
+	AssertEquals(t, 1, 2)
+}
 
-// 	store.SavePhoto(user, photo.PhotoFile)
-// 	photos := store.PhotosForUser(user)
+// uploadPhoto reads a FormFile
 
-// 	It("adds the Photo.Src")
-// 	AssertEquals(t, "/fake/srv/path/1", photos[0].Src)
-// }
+// registers an assets route

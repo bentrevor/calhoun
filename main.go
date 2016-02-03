@@ -52,10 +52,32 @@ func main() {
 			FullAssetPath: fullAssetPath,
 		}
 
-		app.Run("dev", server)
 	case "cli":
-		log.Fatal("cli not implemented yet")
+		postgresDB := db.NewPostgresDB("dev")
+		realFS := db.RealFS{RootDir: srvPath}
+		store := app.CalhounStore{DB: postgresDB, FS: realFS, SrvPath: srvPath}
+
+		renderer := web.ConsoleRenderer{
+			ViewsPath:  fmt.Sprintf("%s/web/views", rootDir),
+			PhotosPath: srvPath,
+		}
+
+		calhoun := app.Calhoun{
+			Store:    store,
+			Renderer: renderer,
+		}
+
+		server := web.ConsoleServer{
+			App:           calhoun,
+			AssetPath:     assetPath,
+			FullAssetPath: fullAssetPath,
+		}
+
+		app.Run("dev", server)
+
 	default:
 		log.Fatal("can only use web ui for now: `", ui, "` not supported")
 	}
+
+	app.Run("dev", server)
 }
