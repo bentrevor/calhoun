@@ -3,6 +3,7 @@ package app
 import (
 	"io"
 	"log"
+	"mime/multipart"
 )
 
 type CalhounServer interface {
@@ -20,8 +21,10 @@ type CalhounHandler func(io.Writer, *CalhounRequest)
 type Middleware func(CalhounHandler) CalhounHandler
 
 type CalhounRequest struct {
-	Url  string
-	Body string
+	// will eventually want these (logging, etc.)
+	// Url      string
+	// Body     string
+	UploadFile *multipart.File
 }
 
 type Route struct {
@@ -44,7 +47,7 @@ func LoggingMW2(f CalhounHandler) CalhounHandler {
 	}
 }
 
-func (route Route) BuildCalhounHandler() CalhounHandler {
+func (route Route) ApplyMiddlewareToBase() CalhounHandler {
 	return route.applyMiddleware(0)
 }
 

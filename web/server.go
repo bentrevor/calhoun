@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"mime/multipart"
 	"net/http"
 
 	. "github.com/bentrevor/calhoun/app"
@@ -19,18 +20,24 @@ type WebServer struct {
 func (s WebServer) RegisterRoutes() {
 	s.Routes = []Route{
 		Route{
-			Path:            "/upload",
-			BaseHandlerFunc: s.uploadPhoto(),
+			Path: "/upload",
+			BaseHandlerFunc: func(w io.Writer, r *CalhounRequest) {
+				s.App.UploadPhoto(w, r.UploadFile)
+			},
 		},
 		Route{
-			Path:            "/upload_photo",
-			BaseHandlerFunc: s.uploadPhotoForm(),
-			Middlewares:     []Middleware{LoggingMW, LoggingMW2},
+			Path: "/upload_photo",
+			BaseHandlerFunc: func(w io.Writer, _ *CalhounRequest) {
+				s.App.UploadPhotoForm(w)
+			},
+			Middlewares: []Middleware{LoggingMW, LoggingMW2},
 		},
 		Route{
-			Path:            "/view_photos",
-			BaseHandlerFunc: s.viewPhotos(),
-			Middlewares:     []Middleware{LoggingMW},
+			Path: "/view_photos",
+			BaseHandlerFunc: func(w io.Writer, _ *CalhounRequest) {
+				s.App.ViewPhotos(w)
+			},
+			Middlewares: []Middleware{LoggingMW},
 		},
 	}
 
@@ -43,51 +50,43 @@ func (WebServer) Start() {
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-func (s WebServer) registerPageRoutes() {
-	for i := 0; i < len(s.Routes); i++ {
-		route := s.Routes[i]
-		hf := route.BuildCalhounHandler()
-
-		http.HandleFunc(route.Path, s.buildHttpHandlerFunc(hf))
-	}
-}
-
-func (s WebServer) buildHttpHandlerFunc(f CalhounHandler) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		calhounReq := CalhounRequest{Url: r.URL.Path, Body: "io.ReadCloser stuff"}
-		f(w, &calhounReq)
-	}
-}
-
 func (s WebServer) registerAssetRoutes() {
 	// TODO should use a real asset pipeline eventually
 	assetPath := fmt.Sprintf("/%s/", s.AssetPath)
 	http.Handle(assetPath, http.StripPrefix(assetPath, http.FileServer(http.Dir(s.FullAssetPath))))
 }
 
-func (s WebServer) uploadPhotoForm() CalhounHandler {
-	return func(w io.Writer, _ *CalhounRequest) {
-		s.App.UploadPhotoForm(w)
+func (s WebServer) registerPageRoutes() {
+	for i := 0; i < len(s.Routes); i++ {
+		route := s.Routes[i]
+
+		calhounHandler := route.ApplyMiddlewareToBase()
+		handlerFunc := s.calhounToHttpHandler(calhounHandler, route)
+
+		http.HandleFunc(route.Path, handlerFunc)
 	}
 }
 
-func (s WebServer) uploadPhoto() CalhounHandler {
-	return func(w io.Writer, r *CalhounRequest) {
-		// CalhounRequest.FormFile undefined
-		file, _, err := r.FormFile("photoUpload")
-		defer file.Close()
+// ideally, I would be able to define an adapter fn like this for every route, and the Route would
+// know how to adapt itself, but then either 1) presentation details (e.g. http) would leak into the
+// app, or 2) I would have to add `interface{}` to my types.  This way has some duplication (and a
+// lot of indirection...), but I think it best separates app from presentation.
+func (s WebServer) calhounToHttpHandler(calhounHandler CalhounHandler, route Route) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var file multipart.File
 
-		if err != nil {
-			fmt.Fprintln(w, "error reading photo upload: ", err)
-			return
+		switch route.Path {
+		case "/upload":
+			file, _, err := r.FormFile("photoUpload")
+			defer file.Close()
+
+			if err != nil {
+				fmt.Fprintln(w, "error reading photo upload: ", err)
+				return
+			}
 		}
 
-		s.App.UploadPhoto(w, &file)
-	}
-}
-
-func (s WebServer) viewPhotos() CalhounHandler {
-	return func(w io.Writer, _ *CalhounRequest) {
-		s.App.ViewPhotos(w)
+		calhounReq := CalhounRequest{UploadFile: &file}
+		calhounHandler(w, &calhounReq)
 	}
 }

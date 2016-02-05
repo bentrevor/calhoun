@@ -2,53 +2,70 @@ package cli
 
 import (
 	"io"
+	"log"
+	"mime/multipart"
+	"os"
+	"strings"
 
 	. "github.com/bentrevor/calhoun/app"
 )
 
-type CliServer struct {
-	App     CalhounApp
-	RootDir string
-	Routes  []Route
+type ConsoleServer struct {
+	App    CalhounApp
+	Args   []string
+	Routes []Route
 }
 
-type CliHandler func(io.Writer, CliRequest)
+type ConsoleHandler func(io.Writer, ConsoleRequest)
+type ConsoleRequest struct {
+	Url string
+}
 
-func (s CliServer) RegisterRoutes() {
+func (s ConsoleServer) RegisterRoutes() {
 	s.Routes = []Route{
 		Route{
-			Path:            "-upload",
-			BaseHandlerFunc: s.uploadPhoto(),
-			Middlewares:     []Middleware{LoggingMW},
+			Path: "upload",
+			BaseHandlerFunc: func(w io.Writer, r *CalhounRequest) {
+				s.App.UploadPhoto(w, r.UploadFile)
+			},
+			Middlewares: []Middleware{LoggingMW2},
 		},
 	}
 }
 
-func (s CliServer) buildHandlerFunc(f CalhoundHandler) CliHandler {
-	return func(w io.Writer, r *CliRequest) {
-		f(w, r)
+func (s ConsoleServer) Start() {
+	// here is where I would specify the console interface if I actually planned on using the
+	// from the command line.  For now it will just expect a command to look like `./calhoun
+	// -ui=cli upload file=/path/to/file`
+	url := s.Args[0]
+	filepath := strings.SplitAfter(s.Args[1], "=")[1] // file=/path/to/file, so I need everything after the =
+
+	var file multipart.File
+
+	switch url {
+	case "upload":
+		file, err := os.Open(filepath)
+		defer file.Close()
+
+		if err != nil {
+			log.Fatal("error reading photo upload: ", err)
+		}
 	}
+
+	route := s.routeWithPath(url)
+	calhounHandler := route.ApplyMiddlewareToBase()
+	request := CalhounRequest{UploadFile: &file}
+	calhounHandler(os.Stdout, &request)
 }
 
-func (s CliServer) Start() {
-	// run command once and quit (for a ReplServer, this could loop)
+func (s ConsoleServer) routeWithPath(url string) Route {
+	for i := 0; i < len(s.Routes); i++ {
+		route := s.Routes[i]
 
-	// (not sure if I have access to the flag package here...)
-	// input := "./calhoun -upload -file /path/to/file"
-	// cmd := "-upload"
-	// args := "-file /path/to/file"
-
-	// route := s.Routes.Where(Path: cmd)
-	// calhounHandler := route.BuildCalhounHandler()
-	// handler := s.buildHandlerFunc(calhounHandler)
-	// handler(args)
-}
-
-func (s CliServer) uploadPhoto() CalhounHandler {
-	return func(w io.Writer, r *CalhounRequest) {
-		// input == "-file /path/to/file"
-
-		// file := os.Read("/path/to/file")
-		// s.App.UploadPhoto(w, &file)
+		if route.Path == url {
+			return route
+		}
 	}
+
+	return Route{}
 }

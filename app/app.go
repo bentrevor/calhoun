@@ -6,6 +6,14 @@ import (
 	"mime/multipart"
 )
 
+// TODO get rid of ISP violations
+// type CalhounAction int
+// const (
+// 	UploadPhoto CalhounAction = iota
+// 	UploadPhotoForm
+// 	ViewPhotos
+// )
+
 type CalhounApp interface {
 	UploadPhoto(io.Writer, *multipart.File)
 	UploadPhotoForm(io.Writer)

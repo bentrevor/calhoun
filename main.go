@@ -6,6 +6,9 @@ import (
 
 	"github.com/bentrevor/calhoun/app"
 	"github.com/bentrevor/calhoun/db"
+
+	// presentation layers
+	"github.com/bentrevor/calhoun/cli"
 	"github.com/bentrevor/calhoun/web"
 
 	"github.com/namsral/flag"
@@ -22,13 +25,12 @@ func main() {
 	flag.StringVar(&rootDir, "root-dir", "/home/vagrant/go/src/github.com/bentrevor/calhoun", "project root")
 	flag.StringVar(&assetPath, "asset-path", "web/assets", "asset path")
 	flag.StringVar(&srvPath, "srv-path", fmt.Sprintf("%s/images/srv", assetPath), "path to save uploaded files")
-
-	// for now, just http/json server, but eventually cli inputs, mobile apps, etc.
 	flag.StringVar(&ui, "ui", "web", "")
 
 	flag.Parse()
 
 	fullAssetPath := fmt.Sprintf("%s/%s", rootDir, assetPath)
+	var server app.CalhounServer
 
 	switch ui {
 	case "web":
@@ -46,35 +48,27 @@ func main() {
 			Renderer: renderer,
 		}
 
-		server := web.WebServer{
+		server = web.WebServer{
 			App:           calhoun,
 			AssetPath:     assetPath,
 			FullAssetPath: fullAssetPath,
 		}
-
 	case "cli":
 		postgresDB := db.NewPostgresDB("dev")
 		realFS := db.RealFS{RootDir: srvPath}
 		store := app.CalhounStore{DB: postgresDB, FS: realFS, SrvPath: srvPath}
 
-		renderer := web.ConsoleRenderer{
-			ViewsPath:  fmt.Sprintf("%s/web/views", rootDir),
-			PhotosPath: srvPath,
-		}
+		renderer := cli.ConsoleRenderer{}
 
 		calhoun := app.Calhoun{
 			Store:    store,
 			Renderer: renderer,
 		}
 
-		server := web.ConsoleServer{
-			App:           calhoun,
-			AssetPath:     assetPath,
-			FullAssetPath: fullAssetPath,
+		server = cli.ConsoleServer{
+			App:  calhoun,
+			Args: flag.Args(),
 		}
-
-		app.Run("dev", server)
-
 	default:
 		log.Fatal("can only use web ui for now: `", ui, "` not supported")
 	}
