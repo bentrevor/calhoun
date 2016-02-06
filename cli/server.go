@@ -28,7 +28,7 @@ func (s ConsoleServer) RegisterRoutes() {
 			BaseHandlerFunc: func(w io.Writer, r *CalhounRequest) {
 				s.App.UploadPhoto(w, r.UploadFile)
 			},
-			Middlewares: []Middleware{LoggingMW2},
+			Middlewares: []Middleware{LoggingMW},
 		},
 	}
 }

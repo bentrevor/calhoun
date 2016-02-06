@@ -30,7 +30,7 @@ func (s WebServer) RegisterRoutes() {
 			BaseHandlerFunc: func(w io.Writer, _ *CalhounRequest) {
 				s.App.UploadPhotoForm(w)
 			},
-			Middlewares: []Middleware{LoggingMW, LoggingMW2},
+			Middlewares: []Middleware{LoggingMW},
 		},
 		Route{
 			Path: "/view_photos",
@@ -73,20 +73,24 @@ func (s WebServer) registerPageRoutes() {
 // lot of indirection...), but I think it best separates app from presentation.
 func (s WebServer) calhounToHttpHandler(calhounHandler CalhounHandler, route Route) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		calhounReq := CalhounRequest{Url: route.Path}
+
 		var file multipart.File
+		var err error
 
 		switch route.Path {
 		case "/upload":
-			file, _, err := r.FormFile("photoUpload")
+			file, _, err = r.FormFile("photoUpload")
 			defer file.Close()
 
-			if err != nil {
+			if err != nil || file == nil {
 				fmt.Fprintln(w, "error reading photo upload: ", err)
 				return
 			}
+
+			calhounReq.UploadFile = &file
 		}
 
-		calhounReq := CalhounRequest{UploadFile: &file}
 		calhounHandler(w, &calhounReq)
 	}
 }
