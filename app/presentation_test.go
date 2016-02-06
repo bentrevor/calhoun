@@ -1,7 +1,6 @@
 package app_test
 
 import (
-	"fmt"
 	"io"
 	"os"
 
@@ -19,14 +18,16 @@ func TestRoute_ApplyMiddleware(t *testing.T) {
 
 	middlewares := []Middleware{
 		func(h CalhounHandler) CalhounHandler {
-			fmt.Println("1")
-			appliedMiddlewares = append(appliedMiddlewares, "first")
-			return h
+			return func(w io.Writer, r *CalhounRequest) {
+				appliedMiddlewares = append(appliedMiddlewares, "first")
+				h(w, r)
+			}
 		},
 		func(h CalhounHandler) CalhounHandler {
-			fmt.Println("2")
-			appliedMiddlewares = append(appliedMiddlewares, "second")
-			return h
+			return func(w io.Writer, r *CalhounRequest) {
+				appliedMiddlewares = append(appliedMiddlewares, "second")
+				h(w, r)
+			}
 		},
 	}
 
@@ -41,6 +42,5 @@ func TestRoute_ApplyMiddleware(t *testing.T) {
 	handler := route.ApplyMiddlewareToBase()
 	handler(os.Stdout, &CalhounRequest{})
 
-	// really confused about why this is running the second middleware before the first...
 	AssertEquals(t, appliedMiddlewares, []string{"first", "second", "base"})
 }

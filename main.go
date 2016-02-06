@@ -48,7 +48,7 @@ func main() {
 			Renderer: renderer,
 		}
 
-		server = web.WebServer{
+		server = &web.WebServer{
 			App:           calhoun,
 			AssetPath:     assetPath,
 			FullAssetPath: fullAssetPath,
