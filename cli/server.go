@@ -50,6 +50,8 @@ func (s ConsoleServer) Start() {
 		if err != nil {
 			log.Fatal("error reading photo upload: ", err)
 		}
+	default:
+		log.Fatal("invalid command: `", url, "`")
 	}
 
 	route := s.routeWithPath(url)

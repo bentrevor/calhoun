@@ -13,3 +13,10 @@ func LoggingMW(f CalhounHandler) CalhounHandler {
 		f(w, request)
 	}
 }
+
+func LoggingMW2(f CalhounHandler) CalhounHandler {
+	return func(w io.Writer, request *CalhounRequest) {
+		log.Printf(":2> hit `%s` route", request.Url)
+		f(w, request)
+	}
+}

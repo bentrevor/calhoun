@@ -17,7 +17,7 @@ type WebServer struct {
 	Routes        []Route
 }
 
-func (s WebServer) RegisterRoutes() {
+func (s *WebServer) RegisterRoutes() {
 	s.Routes = []Route{
 		Route{
 			Path: "/upload",
@@ -50,9 +50,10 @@ func (WebServer) Start() {
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-func (s WebServer) registerAssetRoutes() {
+func (s *WebServer) registerAssetRoutes() {
 	// TODO should use a real asset pipeline eventually
 	assetPath := fmt.Sprintf("/%s/", s.AssetPath)
+	s.Routes = append(s.Routes, Route{Path: assetPath})
 	http.Handle(assetPath, http.StripPrefix(assetPath, http.FileServer(http.Dir(s.FullAssetPath))))
 }
 
