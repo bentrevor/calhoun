@@ -2,7 +2,6 @@ package web
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"mime/multipart"
 	"net/http"
@@ -11,7 +10,7 @@ import (
 )
 
 type WebServer struct {
-	App           CalhounApp
+	App           Calhouner
 	AssetPath     string
 	FullAssetPath string
 	Routes        []Route
@@ -20,23 +19,17 @@ type WebServer struct {
 func (s *WebServer) RegisterRoutes() {
 	s.Routes = []Route{
 		Route{
-			Path: "/upload",
-			BaseHandlerFunc: func(w io.Writer, r *CalhounRequest) {
-				s.App.UploadPhoto(w, r.UploadFile)
-			},
+			Path:   "/upload",
+			Action: UploadPhoto,
 		},
 		Route{
-			Path: "/upload_photo",
-			BaseHandlerFunc: func(w io.Writer, _ *CalhounRequest) {
-				s.App.UploadPhotoForm(w)
-			},
+			Path:        "/upload_photo",
+			Action:      UploadPhotoForm,
 			Middlewares: []Middleware{LoggingMW},
 		},
 		Route{
-			Path: "/view_photos",
-			BaseHandlerFunc: func(w io.Writer, _ *CalhounRequest) {
-				s.App.ViewPhotos(w)
-			},
+			Path:        "/view_photos",
+			Action:      ViewPhotos,
 			Middlewares: []Middleware{LoggingMW},
 		},
 	}
@@ -61,7 +54,8 @@ func (s WebServer) registerPageRoutes() {
 	for i := 0; i < len(s.Routes); i++ {
 		route := s.Routes[i]
 
-		calhounHandler := route.ApplyMiddlewareToBase()
+		baseHandler := s.App.LookupHandler(route.Action)
+		calhounHandler := route.ApplyMiddlewareToBase(baseHandler)
 		handlerFunc := s.calhounToHttpHandler(calhounHandler, route)
 
 		http.HandleFunc(route.Path, handlerFunc)

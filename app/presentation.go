@@ -10,34 +10,36 @@ type CalhounServer interface {
 	Start()
 }
 
+// hmmm...
+type RenderArgs struct {
+	Photos []Photo
+}
+
 type CalhounRenderer interface {
-	UploadPhotoForm(io.Writer)
-	UploadPhoto(io.Writer)
-	ViewPhotos(io.Writer, []Photo)
+	Render(CalhounAction, io.Writer, ...RenderArgs)
 }
 
 type CalhounHandler func(io.Writer, *CalhounRequest)
 
 type CalhounRequest struct {
-	Url string
-	// Body     string
+	Url        string
 	UploadFile *multipart.File
 }
 
 type Route struct {
-	Path            string
-	Middlewares     []Middleware
-	BaseHandlerFunc CalhounHandler
+	Path        string
+	Middlewares []Middleware
+	Action      CalhounAction
 }
 
-func (route Route) ApplyMiddlewareToBase() CalhounHandler {
-	return route.applyMiddleware(0)
+func (route Route) ApplyMiddlewareToBase(base CalhounHandler) CalhounHandler {
+	return route.applyMiddleware(0, base)
 }
 
-func (route Route) applyMiddleware(count int) CalhounHandler {
+func (route Route) applyMiddleware(count int, base CalhounHandler) CalhounHandler {
 	if count >= len(route.Middlewares) {
-		return route.BaseHandlerFunc
+		return base
 	} else {
-		return route.Middlewares[count](route.applyMiddleware(count + 1))
+		return route.Middlewares[count](route.applyMiddleware(count+1, base))
 	}
 }

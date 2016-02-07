@@ -6,7 +6,7 @@ import (
 	"io"
 	"log"
 
-	"github.com/bentrevor/calhoun/app"
+	. "github.com/bentrevor/calhoun/app"
 )
 
 type Page struct {
@@ -36,23 +36,24 @@ func (br *BrowserRenderer) renderHtmlFile(filename string, writer io.Writer, pag
 	tmpl.Execute(writer, page)
 }
 
-func (br BrowserRenderer) UploadPhoto(w io.Writer) {
-	br.renderHtmlFile("upload_success", w, Page{})
-}
+func (br BrowserRenderer) Render(action CalhounAction, w io.Writer, args ...RenderArgs) {
+	switch action {
+	case UploadPhotoForm:
+		br.renderHtmlFile("upload_photo_form", w, Page{})
+	case UploadPhoto:
+		br.renderHtmlFile("upload_success", w, Page{})
+	case ViewPhotos:
+		photoTags := []PhotoTag{}
 
-func (br BrowserRenderer) UploadPhotoForm(w io.Writer) {
-	br.renderHtmlFile("upload_photo_form", w, Page{})
-}
+		for _, photo := range args[0].Photos {
+			photoTags = append(photoTags, PhotoTag{
+				Src:       fmt.Sprintf("%s/%s", br.PhotosPath, photo.Src),
+				ClassName: fmt.Sprintf("image_%d", photo.Id),
+			})
+		}
 
-func (br BrowserRenderer) ViewPhotos(w io.Writer, photos []app.Photo) {
-	photoTags := []PhotoTag{}
-
-	for _, photo := range photos {
-		photoTags = append(photoTags, PhotoTag{
-			Src:       fmt.Sprintf("%s/%s", br.PhotosPath, photo.Src),
-			ClassName: fmt.Sprintf("image_%d", photo.Id),
-		})
+		br.renderHtmlFile("view_photos", w, Page{PhotoTags: photoTags})
+	default:
+		log.Fatal(action, " not implemented for web")
 	}
-
-	br.renderHtmlFile("view_photos", w, Page{PhotoTags: photoTags})
 }

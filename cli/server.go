@@ -11,7 +11,7 @@ import (
 )
 
 type ConsoleServer struct {
-	App    CalhounApp
+	App    Calhouner
 	Args   []string
 	Routes []Route
 }
@@ -24,10 +24,8 @@ type ConsoleRequest struct {
 func (s ConsoleServer) RegisterRoutes() {
 	s.Routes = []Route{
 		Route{
-			Path: "upload",
-			BaseHandlerFunc: func(w io.Writer, r *CalhounRequest) {
-				s.App.UploadPhoto(w, r.UploadFile)
-			},
+			Path:        "upload",
+			Action:      UploadPhoto,
 			Middlewares: []Middleware{LoggingMW},
 		},
 	}
@@ -55,8 +53,10 @@ func (s ConsoleServer) Start() {
 	}
 
 	route := s.routeWithPath(url)
-	calhounHandler := route.ApplyMiddlewareToBase()
+	baseHandler := s.App.LookupHandler(route.Action)
+	calhounHandler := route.ApplyMiddlewareToBase(baseHandler)
 	request := CalhounRequest{UploadFile: &file}
+
 	calhounHandler(os.Stdout, &request)
 }
 

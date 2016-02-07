@@ -29,48 +29,33 @@ func main() {
 
 	flag.Parse()
 
-	fullAssetPath := fmt.Sprintf("%s/%s", rootDir, assetPath)
 	var server app.CalhounServer
+	postgresDB := db.NewPostgresDB("dev")
+	realFS := db.RealFS{RootDir: srvPath}
+	store := app.CalhounStore{DB: postgresDB, FS: realFS, SrvPath: srvPath}
+	calhoun := app.Calhoun{Store: store}
 
 	switch ui {
 	case "web":
-		postgresDB := db.NewPostgresDB("dev")
-		realFS := db.RealFS{RootDir: srvPath}
-		store := app.CalhounStore{DB: postgresDB, FS: realFS, SrvPath: srvPath}
-
-		renderer := web.BrowserRenderer{
+		calhoun.Renderer = web.BrowserRenderer{
 			ViewsPath:  fmt.Sprintf("%s/web/views", rootDir),
 			PhotosPath: srvPath,
-		}
-
-		calhoun := app.Calhoun{
-			Store:    store,
-			Renderer: renderer,
 		}
 
 		server = &web.WebServer{
 			App:           calhoun,
 			AssetPath:     assetPath,
-			FullAssetPath: fullAssetPath,
+			FullAssetPath: fmt.Sprintf("%s/%s", rootDir, assetPath),
 		}
 	case "cli":
-		postgresDB := db.NewPostgresDB("dev")
-		realFS := db.RealFS{RootDir: srvPath}
-		store := app.CalhounStore{DB: postgresDB, FS: realFS, SrvPath: srvPath}
-
-		renderer := cli.ConsoleRenderer{}
-
-		calhoun := app.Calhoun{
-			Store:    store,
-			Renderer: renderer,
-		}
+		calhoun.Renderer = cli.ConsoleRenderer{}
 
 		server = cli.ConsoleServer{
 			App:  calhoun,
 			Args: flag.Args(),
 		}
 	default:
-		log.Fatal("can only use web ui for now: `", ui, "` not supported")
+		log.Fatal(ui, " not supported")
 	}
 
 	app.Run("dev", server)
